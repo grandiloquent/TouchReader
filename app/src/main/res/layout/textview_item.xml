@@ -4,7 +4,8 @@
           android:layout_height="wrap_content"
           android:id="@+id/textView"
           android:layout_marginLeft="4.0dip"
-          android:textSize="15.0sp" android:textColor="#ff000000"
+          android:textColor="@drawable/selector_white_gray"
+          android:textSize="15.0sp"
 >
 
 </TextView>

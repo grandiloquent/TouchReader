@@ -9,10 +9,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.widget.TextView;
 
 import java.io.File;
 
-public class MainActivity extends Activity implements ReaderView.SelectListener {
+public class MainActivity extends Activity implements ReaderView.SelectListener, Translator.AsyncTaskListener {
 
     private static final String KEY_FONTSIZE = "fontsize";
     private static final String KEY_LINESPACINGMULTIPLIER = "lineSpacingMultiplier";
@@ -22,8 +23,10 @@ public class MainActivity extends Activity implements ReaderView.SelectListener 
     private static final int REQUEST_PERMISSIONS_CODE = 342;
     private int mCount = 1;
     private ReaderView mReaderView;
+    private TextView mDicTextView;
     private SharedPreferences mSharedPreferences;
     private View mShowBookList;
+    private boolean mIsChinese = true;
     public static final String KEY_TAG = "tag";
 
     private void applyReaderViewSetting() {
@@ -58,6 +61,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener 
     private void initialize() {
 
         DataProvider.getInstance(this);
+        mDicTextView = findViewById(R.id.dicTextView);
         mReaderView = findViewById(R.id.readerView);
         mReaderView.setSelectListener(this);
         applyReaderViewSetting();
@@ -79,13 +83,31 @@ public class MainActivity extends Activity implements ReaderView.SelectListener 
     }
 
     @Override
-    public void onSelectionChange(String value) {
+    public void onPostExecute(String value) {
+        mDicTextView.setText(value);
+    }
+
+    @Override
+    public void onPreExecute() {
 
     }
 
     @Override
-    public void onClick() {
+    public void onError(String value) {
 
+    }
+
+    @Override
+    public void onSelectionChange(String value) {
+        if (mIsChinese)
+            Translator.getInstance(this, this).addRequestQueue(value.trim());
+        else
+            TranslatorMerriam.getInstance(this, this).addRequestQueue(value.trim());
+    }
+
+    @Override
+    public void onClick() {
+        mDicTextView.setText(null);
     }
 
     @Override
