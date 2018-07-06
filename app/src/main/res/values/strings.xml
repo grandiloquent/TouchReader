@@ -3,4 +3,19 @@
     <string name="change_tag">更改书名</string>
     <string name="add_from_clipboard">从剪切板添加</string>
 
+    <string name="menu_jump_to">跳转</string>
+    <string name="menu_font_size">字体大小</string>
+    <string name="menu_file_list">文件</string>
+    <string name="menu_font_decrease">减小字体</string>
+    <string name="menu_font_increase">增大字体</string>
+    <string name="menu_change_dictionary">切换字典</string>
+    <string name="menu_set_padding">间距</string>
+    <string name="menu_set_line">行间距</string>
+
+    <string name="context_menu_set_fontface">设置为字体</string>
+    <string name="context_menu_convert_txt">转换为文本文件</string>
+    <string name="context_menu_delete">删除</string>
+    <string name="context_menu_import">导入</string>
+
+    <string name="context_menu_exit">退出</string>
 </resources>

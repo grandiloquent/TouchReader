@@ -32,90 +32,14 @@ import java.util.Map;
 public class TranslatorMerriam {
 
 
-    private class MerriamHandler extends DefaultHandler {
-        private boolean mIsDt;
-        private final StringBuilder mStringBuilder = new StringBuilder();
-
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            if (qName == "dt") {
-                mIsDt = true;
-            }
-        }
-
-        @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
-            if (mIsDt) {
-
-                String value = new String(ch, start, length);
-                if (!value.equals(":"))
-                    mStringBuilder.append(value);
-                mIsDt = false;
-            }
-        }
-
-        @Override
-        public String toString() {
-            String value = mStringBuilder.toString();
-            value = value.replaceAll(":+", "\n");
-
-            return value.trim();
-        }
-    }
-
-
-    private String parseXMLBySAXParser(String value) {
-        SAXParserFactory SAXfactory = SAXParserFactory.newInstance();
-        try {
-            SAXParser saxParser = SAXfactory.newSAXParser();
-            InputStream stream = new ByteArrayInputStream(value.trim().getBytes(Charset.forName("utf8")));
-
-            MerriamHandler handler = new MerriamHandler();
-            saxParser.parse(stream, handler);
-
-            return handler.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    private static final String QUERY_ADRESS = "http://www.dictionaryapi.com/api/v1/references/learners/xml/";
+    private final DataProvider mDataProvider;
 
     ;
-
     private final Translator.AsyncTaskListener mListener;
 
     private final RequestQueue mRequestQueue;
-
-    private final DataProvider mDataProvider;
     private static TranslatorMerriam sTranslator;
-
-
-    public static TranslatorMerriam getInstance(Context context, Translator.AsyncTaskListener listener) {
-        if (sTranslator == null) {
-            sTranslator = new TranslatorMerriam(listener, context);
-        }
-        return sTranslator;
-    }
-
-    public TranslatorMerriam(Translator.AsyncTaskListener listener, Context context) {
-        mListener = listener;
-
-        mDataProvider = new DataProvider(context);
-        mRequestQueue = Volley.newRequestQueue(context);
-
-    }
-
-
-    public void addRequestQueue(String value) {
-
-        String result = mDataProvider.query(value.toLowerCase());
-        if (result != null && mListener != null) {
-            mListener.onPostExecute(value + "   " + result);
-        } else {
-            mRequestQueue.add(buildRequest(value));
-        }
-    }
 
     private JsonObjectRequest buildJsonRequest(final String value) {
         return new JsonObjectRequest
@@ -154,42 +78,6 @@ public class TranslatorMerriam {
                 return headers;
             }
         };
-
-    }
-
-    private String parseJson(JSONObject jsonObject) {
-
-        StringBuilder sb = new StringBuilder();
-
-        try {
-            JSONArray dictArray = jsonObject.getJSONArray("dict");
-            if (dictArray != null || dictArray.length() > 0) {
-                JSONArray termsArray = dictArray.getJSONObject(0).getJSONArray("terms");
-
-                for (int i = 0; i < termsArray.length(); i++) {
-                    sb.append(termsArray.getString(i)).append(';');
-                }
-
-            }
-        } catch (Exception e) {
-
-        }
-        try {
-            JSONArray sentencesArray = jsonObject.getJSONArray("sentences");
-
-            if (sentencesArray != null || sentencesArray.length() > 0) {
-                String trans = sentencesArray.getJSONObject(0).getString("trans");
-                if (trans != null)
-                    sb.append(trans).append('\n');
-            }
-
-
-        } catch (Exception e) {
-
-        }
-
-        return sb.toString();
-
 
     }
 
@@ -250,22 +138,133 @@ public class TranslatorMerriam {
 
     }
 
-    private static final String QUERY_ADRESS = "http://www.dictionaryapi.com/api/v1/references/learners/xml/";
+    private String parseJson(JSONObject jsonObject) {
 
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            JSONArray dictArray = jsonObject.getJSONArray("dict");
+            if (dictArray != null || dictArray.length() > 0) {
+                JSONArray termsArray = dictArray.getJSONObject(0).getJSONArray("terms");
+
+                for (int i = 0; i < termsArray.length(); i++) {
+                    sb.append(termsArray.getString(i)).append(';');
+                }
+
+            }
+        } catch (Exception e) {
+
+        }
+        try {
+            JSONArray sentencesArray = jsonObject.getJSONArray("sentences");
+
+            if (sentencesArray != null || sentencesArray.length() > 0) {
+                String trans = sentencesArray.getJSONObject(0).getString("trans");
+                if (trans != null)
+                    sb.append(trans).append('\n');
+            }
+
+
+        } catch (Exception e) {
+
+        }
+
+        return sb.toString();
+
+
+    }
+
+    private String parseXMLBySAXParser(String value) {
+        SAXParserFactory SAXfactory = SAXParserFactory.newInstance();
+        try {
+            SAXParser saxParser = SAXfactory.newSAXParser();
+            InputStream stream = new ByteArrayInputStream(value.trim().getBytes(Charset.forName("utf8")));
+
+            MerriamHandler handler = new MerriamHandler();
+            saxParser.parse(stream, handler);
+
+            return handler.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void addRequestQueue(String value) {
+
+        String result = mDataProvider.query(value.toLowerCase());
+        if (result != null && mListener != null) {
+            mListener.onPostExecute(value + "   " + result);
+        } else {
+            mRequestQueue.add(buildRequest(value));
+        }
+    }
+
+    public static TranslatorMerriam getInstance(Context context, Translator.AsyncTaskListener listener) {
+        if (sTranslator == null) {
+            sTranslator = new TranslatorMerriam(listener, context);
+        }
+        return sTranslator;
+    }
+
+    private class MerriamHandler extends DefaultHandler {
+        private final StringBuilder mStringBuilder = new StringBuilder();
+        private boolean mIsDt;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            if (qName == "dt") {
+                mIsDt = true;
+            }
+        }
+
+        @Override
+        public void characters(char[] ch, int start, int length) throws SAXException {
+            if (mIsDt) {
+
+                String value = new String(ch, start, length);
+                if (!value.equals(":"))
+                    mStringBuilder.append(value);
+                mIsDt = false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            String value = mStringBuilder.toString();
+            value = value.replaceAll(":+", "\n");
+
+            return value.trim();
+        }
+    }
+
+    public TranslatorMerriam(Translator.AsyncTaskListener listener, Context context) {
+        mListener = listener;
+
+        mDataProvider = new DataProvider(context);
+        mRequestQueue = Volley.newRequestQueue(context);
+
+    }
 
     private class DataProvider extends SQLiteOpenHelper {
 
 
-        public DataProvider(Context context) {
-
-            super(context, new File(new File(Environment.getExternalStorageDirectory(), ".readings"), "psycho_en.db").getAbsolutePath(),
-                    null, 1);
+        public void insert(String key, String value) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("key", key);
+            contentValues.put("word", value);
+            getWritableDatabase().insertWithOnConflict("dic", null, contentValues, SQLiteDatabase.CONFLICT_IGNORE);
         }
 
         @Override
         public void onCreate(SQLiteDatabase sqLiteDatabase) {
             sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS dic (key TEXT ,word TEXT)");
             sqLiteDatabase.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `key_UNIQUE` ON `dic` (`key` ASC)");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+
         }
 
         public String query(String key) {
@@ -280,16 +279,10 @@ public class TranslatorMerriam {
             return result;
         }
 
-        public void insert(String key, String value) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put("key", key);
-            contentValues.put("word", value);
-            getWritableDatabase().insert("dic", null, contentValues);
-        }
+        public DataProvider(Context context) {
 
-        @Override
-        public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
+            super(context, new File(new File(Environment.getExternalStorageDirectory(), ".readings"), "psycho_en.db").getAbsolutePath(),
+                    null, 1);
         }
     }
 }

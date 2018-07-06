@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -29,11 +30,12 @@ import java.util.regex.Pattern;
 public class MainActivity extends Activity implements ReaderView.SelectListener, Translator.AsyncTaskListener {
 
     private static final String KEY_FONTSIZE = "fontsize";
+    private static final String KEY_LANGUAGE = "is_chinese";
     private static final String KEY_LINESPACINGMULTIPLIER = "lineSpacingMultiplier";
     private static final String KEY_PADDING = "padding";
     private static final String KEY_PATTERN = "pattern";
-    private static final String KEY_TYPEFACE = "typeface";
     private static final int REQUEST_BOOK_CODE = 1;
+    private static final int REQUEST_FILE_CODE = 2;
     private static final int REQUEST_PERMISSIONS_CODE = 342;
     private static final String TAG = "MainActivity";
     private int mCount = 1;
@@ -47,6 +49,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
     private SharedPreferences mSharedPreferences;
     private String mTag;
     public static final String KEY_TAG = "tag";
+    public static final String KEY_TYPEFACE = "typeface";
 
     private void applyReaderViewSetting() {
         if (mSharedPreferences == null)
@@ -79,6 +82,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
 
     private void applySettings() {
 
+        mIsChinese = mSharedPreferences.getBoolean(KEY_LANGUAGE, true);
         String tag = mSharedPreferences.getString("tag", null);
         if (tag == null) return;
         int count = 1;
@@ -221,6 +225,143 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
         applySettings();
     }
 
+    private void menuChangeDictionary() {
+        mIsChinese = !mIsChinese;
+
+        mSharedPreferences.edit().putBoolean(KEY_LANGUAGE, mIsChinese).commit();
+
+    }
+
+    private void menuFontSizeDecrease() {
+
+        float fontSize = mSharedPreferences.getFloat(KEY_FONTSIZE, 0f);
+        if (fontSize == 0f || fontSize - 0.5f < 0f) return;
+        fontSize = fontSize - 0.5f;
+        mSharedPreferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit();
+        mReaderView.setTextSize(fontSize * getResources().getDisplayMetrics().scaledDensity);
+    }
+
+    private void menuFontSizeIncrease() {
+        float fontSize = mSharedPreferences.getFloat(KEY_FONTSIZE, 0f);
+
+        fontSize = fontSize + 0.5f;
+        mSharedPreferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit();
+        mReaderView.setTextSize(fontSize * getResources().getDisplayMetrics().scaledDensity);
+    }
+
+    private void menuJumpTo() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText editText = new EditText(this);
+        builder.setView(editText);
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        editText.setText(Integer.toString(mCount));
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                CharSequence c = editText.getText();
+                if (c == null || mTag == null) return;
+                int count = str2int(c.toString());
+                if (count > 0) {
+                    renderText(mTag, count, 0);
+                    mCount = count;
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void menuOpenFileList() {
+        Intent intent = new Intent(this, FileActivity.class);
+        startActivityForResult(intent, REQUEST_FILE_CODE);
+    }
+
+    private void menuSetFontSize() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText editText = new EditText(this);
+        builder.setView(editText);
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        editText.setText(Float.toString(mSharedPreferences.getFloat(KEY_FONTSIZE, 0f)));
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                CharSequence c = editText.getText();
+                if (c == null) return;
+                float fontSize = str2float(c.toString());
+                if (fontSize > 0) {
+                    mSharedPreferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit();
+                    mReaderView.setTextSize(fontSize * getResources().getDisplayMetrics().scaledDensity);
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void menuSetLineSpace() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText editText = new EditText(this);
+        builder.setView(editText);
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        editText.setText(Float.toString(mSharedPreferences.getFloat(KEY_LINESPACINGMULTIPLIER, 0f)));
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                CharSequence c = editText.getText();
+                if (c == null) return;
+                float fontSize = str2float(c.toString());
+                if (fontSize > 0) {
+                    mSharedPreferences.edit().putFloat(KEY_LINESPACINGMULTIPLIER, fontSize).commit();
+                    mReaderView.setLineSpacing(0f, fontSize);
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void menuSetPadding() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText editText = new EditText(this);
+        builder.setView(editText);
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        editText.setText(Integer.toString(mSharedPreferences.getInt(KEY_PADDING, 0)));
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                CharSequence c = editText.getText();
+                if (c == null || mTag == null) return;
+                int count = str2int(c.toString());
+                if (count > 0) {
+                    mReaderView.setPadding(count, count, count, count);
+                    mSharedPreferences.edit().putInt(KEY_PADDING, count).commit();
+                }
+            }
+        });
+        builder.show();
+    }
+
     private void openBookListActivity() {
         Intent intent = new Intent(this, BookListActivity.class);
         startActivityForResult(intent, REQUEST_BOOK_CODE);
@@ -275,12 +416,53 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
 
     private void showMenus() {
 
-        mSelectPicPopupWindow = new SelectPicPopupWindow(this, new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mSelectPicPopupWindow.dismiss();
-            }
-        });
+        Resources resources = getResources();
+        mSelectPicPopupWindow = new SelectPicPopupWindow(this,
+                new int[]{
+                        R.mipmap.ic_arrow_forward_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+                        R.mipmap.ic_apps_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+
+                },
+                new String[]{
+                        resources.getString(R.string.menu_jump_to),
+                        resources.getString(R.string.menu_font_size),
+                        resources.getString(R.string.menu_file_list),
+                        resources.getString(R.string.menu_font_decrease),
+                        resources.getString(R.string.menu_font_increase),
+                        resources.getString(R.string.menu_change_dictionary),
+                        resources.getString(R.string.menu_set_padding),
+                        resources.getString(R.string.menu_set_line)
+
+                },
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        mSelectPicPopupWindow.dismiss();
+                        if (i == 0) {
+                            menuJumpTo();
+                        } else if (i == 1) {
+                            menuSetFontSize();
+                        } else if (i == 2) {
+                            menuOpenFileList();
+                        } else if (i == 3) {
+                            menuFontSizeDecrease();
+                        } else if (i == 4) {
+                            menuFontSizeIncrease();
+                        } else if (i == 5) {
+                            menuChangeDictionary();
+                        } else if (i == 6) {
+                            menuSetPadding();
+                        } else if (i == 7) {
+                            menuSetLineSpace();
+                        }
+                    }
+                });
 //显示窗口,设置layout在PopupWindow中显示的位置
         mSelectPicPopupWindow.showAtLocation(this.findViewById(R.id.layout), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
 
@@ -328,6 +510,25 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
         mDicTextView.setText(null);
     }
 
+    public float str2float(String s) {
+
+        Pattern pattern = Pattern.compile("[0-9\\.]+");
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            return Float.parseFloat(matcher.group());
+        }
+        return -1f;
+    }
+
+    public int str2int(String s) {
+
+        Pattern pattern = Pattern.compile("[0-9]+");
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return -1;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

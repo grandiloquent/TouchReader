@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -22,11 +21,11 @@ import java.util.Map;
 public class SelectPicPopupWindow extends PopupWindow {
 
 
-    private List<Map<String, Object>> data_list;
     // 图片封装为一个数组
-    private int[] icon = {R.mipmap.controlbar_menu1, R.mipmap.controlbar_menu1};
-    private String[] iconName = {"001", "002"};
+    private final int[] mIcons;
+    private List<Map<String, Object>> data_list;
     private GridView image_gv;
+    private String[] mIconNames;
     private View mMenuView;
     private SimpleAdapter sim_adapter;
 
@@ -37,27 +36,23 @@ public class SelectPicPopupWindow extends PopupWindow {
      */
     public List<Map<String, Object>> getData() {
 //cion和iconName的长度是相同的，这里任选其一都可以
-        for (int i = 0; i < icon.length; i++) {
+        for (int i = 0; i < mIcons.length; i++) {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("image", icon[i]);
-            map.put("text", iconName[i]);
+            map.put("image", mIcons[i]);
+            map.put("text", mIconNames[i]);
             data_list.add(map);
         }
 
         return data_list;
     }
 
-    /**
-     * 返回图标数组
-     *
-     * @return
-     */
-    public int[] getIcon() {
-        return icon;
-    }
 
-    public SelectPicPopupWindow(Activity context, AdapterView.OnItemClickListener itemsOnClick) {
+    public SelectPicPopupWindow(Activity context, int[] iconResources, String[] iconNames, AdapterView.OnItemClickListener itemsOnClick) {
         super(context);
+        mIcons = iconResources;
+        mIconNames = iconNames;
+
+
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 //利用布局生成view
@@ -72,6 +67,9 @@ public class SelectPicPopupWindow extends PopupWindow {
         int[] to = {R.id.image, R.id.text};
         sim_adapter = new SimpleAdapter(context, data_list, R.layout.item_pic_gv, from, to);
 //配置适配器
+        image_gv.setNumColumns(3);
+        image_gv.setVerticalSpacing(5);
+       image_gv.setHorizontalSpacing(10);
         image_gv.setAdapter(sim_adapter);
 
 //设置按钮监听
@@ -91,20 +89,20 @@ public class SelectPicPopupWindow extends PopupWindow {
 //设置SelectPicPopupWindow弹出窗体的背景
         this.setBackgroundDrawable(dw);
 //mMenuView添加OnTouchListener监听判断获取触屏位置如果在选择框外面则销毁弹出框
-        mMenuView.setOnTouchListener(new View.OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-
-                int height = mMenuView.findViewById(R.id.pop_layout).getTop();
-                int y = (int) event.getY();
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (y < height) {
-                        dismiss();
-                    }
-                }
-                return true;
-            }
-        });
+//        mMenuView.setOnTouchListener(new View.OnTouchListener() {
+//
+//            public boolean onTouch(View v, MotionEvent event) {
+//
+//                int height = mMenuView.findViewById(R.id.pop_layout).getTop();
+//                int y = (int) event.getY();
+//                if (event.getAction() == MotionEvent.ACTION_UP) {
+//                    if (y < height) {
+//                        dismiss();
+//                    }
+//                }
+//                return true;
+//            }
+//        });
 
     }
 }
