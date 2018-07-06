@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:orientation="vertical"
+              android:layout_height="match_parent">
+    <euphoria.psycho.library.ReaderView
+            android:id="@+id/readerView"
+            android:layout_width="match_parent"
+            android:padding="20dip"
+            android:textColor="#333"
+            android:textSize="17sp"
+            android:background="#ffcbe1cf"
+            android:lineSpacingMultiplier="1.15"
+            android:layout_weight="1"
+            android:layout_height="0dp"/>
+
+    <android.support.v7.widget.Toolbar android:layout_width="match_parent"
+                                       android:layout_height="wrap_content">
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:weightSum="3"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+
+            <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:scaleType="fitXY"
+                    android:layout_weight="1"
+                    android:src="@mipmap/controlbar_backward_enable1"/>
+
+            <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:scaleType="fitXY"
+                    android:layout_weight="1"
+                    android:src="@mipmap/controlbar_forward_enable1"/>
+
+            <ImageButton
+                    android:id="@+id/showBooklist"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:scaleType="fitXY"
+                    android:layout_weight="1"
+                    android:src="@mipmap/controlbar_menu1"/>
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+
+</LinearLayout>
