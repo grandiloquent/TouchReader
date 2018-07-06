@@ -6,17 +6,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.SpannableStringBuilder;
+import android.text.style.BackgroundColorSpan;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainActivity extends Activity implements ReaderView.SelectListener, Translator.AsyncTaskListener {
@@ -24,19 +31,20 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
     private static final String KEY_FONTSIZE = "fontsize";
     private static final String KEY_LINESPACINGMULTIPLIER = "lineSpacingMultiplier";
     private static final String KEY_PADDING = "padding";
-    private static final String KEY_TYPEFACE = "typeface";
     private static final String KEY_PATTERN = "pattern";
-
+    private static final String KEY_TYPEFACE = "typeface";
     private static final int REQUEST_BOOK_CODE = 1;
     private static final int REQUEST_PERMISSIONS_CODE = 342;
+    private static final String TAG = "MainActivity";
     private int mCount = 1;
-    private int mSearchCount = -1;
     private TextView mDicTextView;
     private boolean mIsChinese = true;
     private ReaderView mReaderView;
     private ScrollView mScrollView;
-    private SharedPreferences mSharedPreferences;
+    private int mSearchCount = -1;
     private List<Integer> mSearchList;
+    private SelectPicPopupWindow mSelectPicPopupWindow;
+    private SharedPreferences mSharedPreferences;
     private String mTag;
     public static final String KEY_TAG = "tag";
 
@@ -69,6 +77,92 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
         }
     }
 
+    private void applySettings() {
+
+        String tag = mSharedPreferences.getString("tag", null);
+        if (tag == null) return;
+        int count = 1;
+        int scrollY = 0;
+
+        int[] settings = DataProvider.getInstance().querySettings(tag);
+
+        if (settings.length > 1) {
+            count = settings[0];
+            scrollY = settings[1];
+        }
+
+        renderText(tag, count, scrollY);
+        mTag = tag;
+        mCount = count;
+    }
+
+    private void back() {
+        if (mTag == null) return;
+        if (mSearchList != null) {
+            if (mSearchCount - 1 > -1) {
+
+                renderText(mTag, mSearchList.get(--mSearchCount), 0);
+                String p = mSharedPreferences.getString(KEY_PATTERN, null);
+                if (p != null) {
+                    implementSearchHighLight(p);
+                }
+            }
+            return;
+        }
+        if (mCount - 1 > 0) {
+            --mCount;
+            renderText(mTag, mCount, 0);
+        }
+    }
+
+    private void forward() {
+        if (mTag == null) return;
+        if (mSearchList != null) {
+            if (mSearchCount + 1 < mSearchList.size()) {
+
+                renderText(mTag, mSearchList.get(++mSearchCount), 0);
+                String p = mSharedPreferences.getString(KEY_PATTERN, null);
+                if (p != null) {
+                    implementSearchHighLight(p);
+                }
+            }
+            return;
+        }
+        ++mCount;
+        renderText(mTag, mCount, 0);
+    }
+
+    private void implementSearchHighLight(String pattern) {
+        Pattern p = Pattern.compile(pattern);
+
+        String value = mReaderView.getText().toString();
+
+        SpannableStringBuilder linkifiedText = new SpannableStringBuilder(value);
+
+
+        Matcher matcher = p.matcher(value);
+        int offset = 0;
+        while (matcher.find()) {
+            if (offset == 0)
+                offset = matcher.start();
+            int start = matcher.start();
+            int end = matcher.end();
+            BackgroundColorSpan span = new BackgroundColorSpan(Color.YELLOW);
+            linkifiedText.setSpan(span, start, end, 0);
+        }
+        mReaderView.setText(linkifiedText);
+        if (offset > 0) {
+            bringPointIntoView(mReaderView, mScrollView, offset);
+        }
+
+    }
+
+    private void implementSearchInBooks(String pattern) {
+        Pattern p = Pattern.compile(pattern);
+        mSearchList = DataProvider.getInstance().queryMatchesContent(mTag, p);
+
+    }
+
     private void initialize() {
 
         DataProvider.getInstance(this);
@@ -76,7 +170,6 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
         mReaderView = findViewById(R.id.readerView);
         mReaderView.setSelectListener(this);
         mScrollView = findViewById(R.id.scrollView);
-        applyReaderViewSetting();
 
         findViewById(R.id.forward).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +210,15 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
                 return true;
             }
         });
+        findViewById(R.id.menu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                showMenus();
+            }
+        });
+        applyReaderViewSetting();
+        applySettings();
     }
 
     private void openBookListActivity() {
@@ -137,6 +239,67 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
         }
     }
 
+    private void searchInBooks() {
+        if (mTag == null) return;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText editText = new EditText(this);
+        builder.setView(editText);
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        final String pattern = mSharedPreferences.getString(KEY_PATTERN, null);
+        if (pattern != null) {
+            editText.setText(pattern);
+        }
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (editText.getText() == null) return;
+                String matchPattern = editText.getText().toString().trim();
+                try {
+                    implementSearchInBooks(matchPattern);
+                    mSharedPreferences.edit().putString(KEY_PATTERN, matchPattern).commit();
+                    if (mSearchList != null) {
+                        forward();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void showMenus() {
+
+        mSelectPicPopupWindow = new SelectPicPopupWindow(this, new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                mSelectPicPopupWindow.dismiss();
+            }
+        });
+//显示窗口,设置layout在PopupWindow中显示的位置
+        mSelectPicPopupWindow.showAtLocation(this.findViewById(R.id.layout), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+
+        //为弹出窗口实现监听类
+    }
+
+    public static void bringPointIntoView(TextView textView,
+                                          final ScrollView scrollView, int offset) {
+        float line = textView.getLayout().getLineForOffset(offset);
+        final int y = (int) ((line + 0.5) * textView.getLineHeight());
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.scrollTo(0, y - scrollView.getHeight() / 2);
+            }
+        });
+        //scrollView.smoothScrollTo(0, y - scrollView.getHeight() / 2);
+    }
+
     @Override
     public void onPostExecute(String value) {
         mDicTextView.setText(value);
@@ -152,34 +315,6 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
 
     }
 
-    private void forward() {
-        if (mTag == null) return;
-        if (mSearchList != null) {
-            if (mSearchCount + 1 < mSearchList.size()) {
-
-                renderText(mTag, mSearchList.get(++mSearchCount), 0);
-            }
-            return;
-        }
-        ++mCount;
-        renderText(mTag, mCount, 0);
-    }
-
-    private void back() {
-        if (mTag == null) return;
-        if (mSearchList != null) {
-            if (mSearchCount - 1 > -1) {
-
-                renderText(mTag, mSearchList.get(--mSearchCount), 0);
-            }
-            return;
-        }
-        if (mCount - 1 > 0) {
-            --mCount;
-            renderText(mTag, mCount, 0);
-        }
-    }
-
     @Override
     public void onSelectionChange(String value) {
         if (mIsChinese)
@@ -188,43 +323,11 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
             TranslatorMerriam.getInstance(this, this).addRequestQueue(value.trim());
     }
 
-    private void searchInBooks() {
-        if (mTag == null) return;
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final EditText editText = new EditText(this);
-        builder.setView(editText);
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-        String pattern = mSharedPreferences.getString(KEY_PATTERN, null);
-        if (pattern != null) {
-            editText.setText(pattern);
-        }
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (editText.getText() == null) return;
-                String matchPattern = editText.getText().toString().trim();
-
-                implementSearchInBooks(matchPattern);
-            }
-        });
-        builder.show();
-    }
-
-    private void implementSearchInBooks(String pattern) {
-        Pattern p = Pattern.compile(pattern);
-        mSearchList = DataProvider.getInstance().queryMatchesContent(mTag, p);
-
-    }
-
     @Override
     public void onClick() {
         mDicTextView.setText(null);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

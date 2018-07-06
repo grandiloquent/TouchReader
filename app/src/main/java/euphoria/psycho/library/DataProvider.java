@@ -7,7 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -15,6 +19,40 @@ import java.util.regex.Pattern;
 public class DataProvider extends SQLiteOpenHelper {
 
     private static DataProvider sDataProvider;
+
+    public void addFromClipboard(String tag, String context) {
+        Cursor cursor = getReadableDatabase().query("document", new String[]{"count"}, "tag=?", new String[]{tag}, null, null, "count DESC");
+        int count = 1;
+        if (cursor.moveToNext()) {
+            count = cursor.getInt(0) + 1;
+        }
+        cursor.close();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("tag", tag);
+        contentValues.put("count", count);
+        contentValues.put("content", context);
+        getWritableDatabase().insert("document", null, contentValues);
+    }
+
+    public void deleteByTag(String tag) {
+        //DELETE FROM COMPANY WHERE ID = 7;
+        getWritableDatabase().delete("document", "tag=?", new String[]{tag});
+
+    }
+
+    public String exportDocument(String tag) {
+
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT content FROM document WHERE tag = ? ORDER BY count ", new String[]{tag});
+        StringBuilder builder = new StringBuilder();
+        while (cursor.moveToNext()) {
+
+            // ,count    int i=cursor.getInt(1);
+            builder.append(cursor.getString(0)).append("\n\n");
+        }
+
+        cursor.close();
+        return builder.toString();
+    }
 
     public static DataProvider getInstance(Context context) {
         if (sDataProvider == null) {
@@ -26,6 +64,69 @@ public class DataProvider extends SQLiteOpenHelper {
     public static DataProvider getInstance() {
 
         return sDataProvider;
+    }
+
+    public void importDocument(File file) {
+        try {
+
+            int threshold = 8000;
+            FileInputStream in = new FileInputStream(file);
+
+            InputStreamReader reader = new InputStreamReader(in, Charset.forName("utf8"));
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            StringBuilder sb = new StringBuilder(threshold);
+            String l;
+            String tag = FileUtils.getFileNameWithoutExtension(file.getName());
+            int count = 0;
+            while ((l = bufferedReader.readLine()) != null) {
+                if (l.trim().length() > 0)
+                    sb.append(l).append("\n\n");
+                if (sb.length() > threshold) {
+
+                    insert(tag, sb.toString(), ++count);
+                    sb = new StringBuilder(threshold);
+                }
+            }
+
+            if (sb.length() > 0) {
+                insert(tag, sb.toString(), ++count);
+            }
+            FileUtils.closeSilently(reader);
+            FileUtils.closeSilently(bufferedReader);
+            FileUtils.closeSilently(in);
+//            File dir = new File(Files.getExternalStorageDirectoryPath(".readings"), ".imported");
+//            dir.mkdirs();
+//            File targetFile = new File(dir, file.getName());
+//            if (!targetFile.isFile())
+//                file.renameTo(targetFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void insert(String tag, String content, int count) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("tag", tag);
+        contentValues.put("content", content);
+        contentValues.put("count", count);
+        getWritableDatabase().insert("document", null, contentValues);
+    }
+
+    public void insertArticle(String context) {
+
+        Cursor cursor = getReadableDatabase().query("document", new String[]{"count"}, "tag=?", new String[]{"Stories From Clipboard"}, null, null, "count DESC");
+        int count = 1;
+        if (cursor.moveToNext()) {
+            count = cursor.getInt(0) + 1;
+        }
+        cursor.close();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("tag", "Stories From Clipboard");
+        contentValues.put("count", count);
+        contentValues.put("content", context);
+        getWritableDatabase().insert("document", null, contentValues);
     }
 
     public List<String> listTag() {
@@ -82,6 +183,19 @@ public class DataProvider extends SQLiteOpenHelper {
         return list;
     }
 
+    public int[] querySettings(String tag) {
+        int[] settings = new int[2];
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT count,scrollY FROM settings WHERE tag = ?", new String[]{tag});
+
+        if (cursor.moveToNext()) {
+            settings[0] = cursor.getInt(0);
+            settings[1] = cursor.getInt(1);
+        }
+        cursor.close();
+
+        return settings;
+    }
+
     public void updateSettings(String tag, int count, int scrollY) {
 
         ContentValues initialValues = new ContentValues();
@@ -93,6 +207,15 @@ public class DataProvider extends SQLiteOpenHelper {
         if (id == -1) {
             getWritableDatabase().update("settings", initialValues, "tag=?", new String[]{tag});  // number 1 is the _id here, update to variable for your code
         }
+    }
+
+    public void updateTag(String tag, String newTag) {
+
+        ContentValues initialValues = new ContentValues();
+        initialValues.put("tag", newTag); // the execution is different if _id is 2
+
+
+        getWritableDatabase().update("document", initialValues, "tag=?", new String[]{tag});  // number 1 is the _id here, update to variable for your code
     }
 
     public DataProvider(Context context) {
