@@ -10,6 +10,7 @@ import android.os.Environment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class DataProvider extends SQLiteOpenHelper {
 
@@ -64,6 +65,21 @@ public class DataProvider extends SQLiteOpenHelper {
         }
         cursor.close();
         return result;
+    }
+
+    public List<Integer> queryMatchesContent(String tag, Pattern pattern) {
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT count,content FROM document WHERE tag = ?", new String[]{tag});
+        List<Integer> list = new ArrayList<>();
+
+
+        while (cursor.moveToNext()) {
+            if (pattern.matcher(cursor.getString(1)).find()) {
+                list.add(cursor.getInt(0));
+            }
+        }
+        cursor.close();
+        if (list.size() < 1) return null;
+        return list;
     }
 
     public void updateSettings(String tag, int count, int scrollY) {
