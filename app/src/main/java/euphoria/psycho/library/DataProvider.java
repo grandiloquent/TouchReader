@@ -129,6 +129,15 @@ public class DataProvider extends SQLiteOpenHelper {
         getWritableDatabase().insert("document", null, contentValues);
     }
 
+    public int queryCount(String t) {
+        Cursor cursor = getReadableDatabase().query("document", new String[]{"count"}, "tag=?", new String[]{t}, null, null, "count DESC");
+        int count = 0;
+        if (cursor.moveToNext()) {
+            count = cursor.getInt(0);
+        }
+        return count;
+    }
+
     public List<String> listTag() {
 
         Cursor cursor = getReadableDatabase().rawQuery("SELECT DISTINCT tag FROM document ORDER BY tag", null);

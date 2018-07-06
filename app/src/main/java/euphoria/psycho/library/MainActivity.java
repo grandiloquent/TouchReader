@@ -17,10 +17,7 @@ import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.*;
 
 import java.io.File;
 import java.util.List;
@@ -109,6 +106,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
                 String p = mSharedPreferences.getString(KEY_PATTERN, null);
                 if (p != null) {
                     implementSearchHighLight(p);
+                    Toast.makeText(this, String.format("当前页面位置:%d.", mSearchList.get(mSearchCount)), Toast.LENGTH_SHORT).show();
                 }
             }
             return;
@@ -128,6 +126,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
                 String p = mSharedPreferences.getString(KEY_PATTERN, null);
                 if (p != null) {
                     implementSearchHighLight(p);
+                    Toast.makeText(this, String.format("当前页面位置:%d.", mSearchList.get(mSearchCount)), Toast.LENGTH_SHORT).show();
                 }
             }
             return;
@@ -209,7 +208,15 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
                 mSearchList = null;
                 mSearchCount = -1;
                 if (mTag != null) {
-                    renderText(mTag, mCount, 0);
+                    int[] settings = DataProvider.getInstance().querySettings(mTag);
+
+                    if (settings.length > 1) {
+                        renderText(mTag, settings[0], settings[1]);
+                        mCount = settings[0];
+                    } else {
+                        renderText(mTag, mCount, 0);
+
+                    }
                 }
                 return true;
             }
@@ -253,6 +260,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final EditText editText = new EditText(this);
         builder.setView(editText);
+        builder.setTitle("1-" + DataProvider.getInstance().queryCount(mTag));
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -404,6 +412,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
                     implementSearchInBooks(matchPattern);
                     mSharedPreferences.edit().putString(KEY_PATTERN, matchPattern).commit();
                     if (mSearchList != null) {
+                        DataProvider.getInstance().updateSettings(mTag, mCount, mScrollView.getScrollY());
                         forward();
                     }
                 } catch (Exception e) {
@@ -563,10 +572,21 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_BOOK_CODE && resultCode == RESULT_OK) {
+            if (mSearchList != null) {
+                mSearchList = null;
+                mSearchCount = -1;
+            }
             String tag = data.getStringExtra(KEY_TAG);
+            int[] settings = DataProvider.getInstance().querySettings(tag);
+            int y = 0;
+            int count = 1;
+            if (settings.length > 1) {
+                count = settings[0];
+                y = settings[1];
+            }
             mTag = tag;
-            mCount = 1;
-            renderText(tag, 1, 0);
+            mCount = count;
+            renderText(tag, count, y);
         }
         super.onActivityResult(requestCode, resultCode, data);
 

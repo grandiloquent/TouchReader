@@ -29,6 +29,7 @@ public class BookListActivity extends Activity implements AdapterView.OnItemClic
             CharSequence prefix = clipData.getItemAt(0).getText();
             if (prefix != null) {
                 DataProvider.getInstance().addFromClipboard(s, prefix.toString());
+                Toast.makeText(this, String.format("成功从剪切板添加%s.", s), Toast.LENGTH_SHORT).show();
                 // refreshList();
             }
         }
@@ -43,6 +44,8 @@ public class BookListActivity extends Activity implements AdapterView.OnItemClic
             if (prefix != null) {
                 DataProvider.getInstance().insertArticle(prefix.toString());
                 refreshList();
+                Toast.makeText(this,"成功从剪切板添加.", Toast.LENGTH_SHORT).show();
+
             }
         }
     }
