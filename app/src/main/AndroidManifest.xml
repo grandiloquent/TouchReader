@@ -17,7 +17,7 @@
                   android:alwaysRetainTaskState="false"
                   android:configChanges="keyboardHidden|orientation|screenSize"
                   android:launchMode="singleTask"
-                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
                   android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".BookListActivity"></activity>
+        <activity android:name=".BookListActivity" android:theme="@style/Theme.AppCompat.Light"></activity>
         <activity android:name=".FileActivity"></activity>
     </application>
 

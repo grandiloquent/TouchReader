@@ -586,6 +586,7 @@ public class MainActivity extends Activity implements ReaderView.SelectListener,
             }
             mTag = tag;
             mCount = count;
+            if (count < 1) count = 1;
             renderText(tag, count, y);
         }
         super.onActivityResult(requestCode, resultCode, data);
