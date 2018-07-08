@@ -32,7 +32,7 @@ class DictionaryTask(val listener: TaskListener) : AsyncTask<String, Void, Strin
     fun queryFromBing(word: String): String? {
 
         var result = DictionaryProvider.instance.query(word)
-        if (result != null) return result
+        if (result != null) return "$word $result"
 
         val url = "https://cn.bing.com/dict/search?q=${Uri.encode(word)}"
         val okHttpClient = OkHttpClient
@@ -61,7 +61,7 @@ class DictionaryTask(val listener: TaskListener) : AsyncTask<String, Void, Strin
 
     fun queryFromYouDao(word: String): String? {
         var result = DictionaryProvider.instance.query(word)
-        if (result != null) return result
+        if (result != null) return "$word $result"
 
         val url = YoudaoUtils.generateRequestUrl(word)
 

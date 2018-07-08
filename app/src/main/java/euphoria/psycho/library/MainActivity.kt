@@ -304,7 +304,7 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
     fun resetSearch() {
         if (mSearchList != null) {
             mSearchList = null
-            mCount = -1
+            mSearchCount = -1
         }
     }
 

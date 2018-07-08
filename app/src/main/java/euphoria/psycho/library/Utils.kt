@@ -46,7 +46,6 @@ fun Context.dialog(strValue: String, title: String?, listener: (v: String) -> Un
 
 fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
     val line = this.layout.getLineForOffset(offset).toFloat()
-    Log.e("TAG", line.toString())
     val y = ((line + 0.5) * this.lineHeight).toInt()
     scrollView.post { scrollView.scrollTo(0, y - scrollView.height / 2) }
 }
