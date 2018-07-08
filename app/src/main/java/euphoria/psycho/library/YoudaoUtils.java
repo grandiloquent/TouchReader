@@ -15,33 +15,22 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class YoudaoUtils {
 
     public static String generateRequestUrl(String query) {
 
-        final Pattern pattern = Pattern.compile("[\u4E00-\u9FA5]");
-        Matcher matcher = pattern.matcher(query);
+//        final Pattern pattern = Pattern.compile("[\u4E00-\u9FA5]");
+//        Matcher matcher = pattern.matcher(query);
 
         String appKey = "1f5687b5a6b94361";
         String salt = String.valueOf(System.currentTimeMillis());
         String from = "";
-        if (matcher.find()) {
-            from = "zh-CHS";
-        } else {
-            from = "EN";
-
-        }
+        from = "EN";
         String to = "";
-        if (matcher.find()) {
-            to = "EN";
 
-        } else {
-            to = "zh-CHS";
+        to = "zh-CHS";
 
-        }
         String sign = md5(appKey + query + salt + "2433z6GPFslGhUuQltdWP7CPlbk8NZC0");
         Map<String, String> params = new HashMap();
         params.put("q", query);
@@ -66,9 +55,9 @@ public class YoudaoUtils {
             builder.append(p.get(0).text()).append(' ');
         }
         if (elements != null && elements.size() > 0) {
-            Element child=elements.first();
+            Element child = elements.first();
 
-            for (Element c:child.children()){
+            for (Element c : child.children()) {
                 builder.append(c.child(0).text().trim()).append(' ');
                 builder.append(c.child(1).text().trim()).append(' ');
 

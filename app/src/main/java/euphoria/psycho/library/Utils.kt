@@ -1,7 +1,12 @@
 package euphoria.psycho.library
 
+import android.app.AlertDialog
 import android.content.Context
-import java.util.regex.Pattern
+import android.util.Log
+import android.widget.EditText
+import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
 
 
 val Context.screenWidth: Int
@@ -14,6 +19,37 @@ fun Context.dp2x(dp: Float): Int {
     return (dp * scale + .5f).toInt()
 }
 
+fun Context.toast(message: String, isShort: Boolean = true) {
+    if (isShort)
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    else
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+
+}
+
+fun Context.dialog(strValue: String, title: String?, listener: (v: String) -> Unit) {
+    val et = EditText(this)
+    et.setText(strValue)
+
+    val b = AlertDialog.Builder(this)
+            .setView(et)
+            .setNegativeButton("取消") { d, _ -> d.dismiss() }
+            .setPositiveButton("确定") { d, _ ->
+                listener(et.text.toString())
+                d.dismiss()
+            }
+    if (title != null) {
+        b.setTitle(title)
+    }
+    b.show()
+}
+
+fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
+    val line = this.layout.getLineForOffset(offset).toFloat()
+    Log.e("TAG", line.toString())
+    val y = ((line + 0.5) * this.lineHeight).toInt()
+    scrollView.post { scrollView.scrollTo(0, y - scrollView.height / 2) }
+}
 /*String*/
 
 fun String.toIntSafe(): Int {
