@@ -1,12 +1,12 @@
 package euphoria.psycho.library
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.view.*
 import android.widget.*
 
@@ -103,7 +103,7 @@ class BookListActivity : Activity() {
         return menuInfo.position
     }
 
-    fun initialize() {
+    private fun initialize() {
         setContentView(R.layout.booklis_activity)
         mList = DataProvider.getInstance().listTag()
         mListView = findViewById(R.id.listView)

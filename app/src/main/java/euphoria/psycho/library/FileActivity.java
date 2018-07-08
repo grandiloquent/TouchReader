@@ -50,6 +50,7 @@ public class FileActivity extends Activity implements AdapterView.OnItemClickLis
                 return false;
             }
         });
+        if (files == null) return new ArrayList<>();
 
         final Collator collator = Collator.getInstance(Locale.CHINA);
         Arrays.sort(files, new Comparator<File>() {
@@ -81,7 +82,7 @@ public class FileActivity extends Activity implements AdapterView.OnItemClickLis
     }
 
     private void setFontface(String path) {
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(MainActivity.KEY_TYPEFACE, path).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("typeface", path).commit();
     }
 
     @Override

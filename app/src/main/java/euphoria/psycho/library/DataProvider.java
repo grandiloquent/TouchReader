@@ -193,7 +193,9 @@ public class DataProvider extends SQLiteOpenHelper {
     }
 
     public int[] querySettings(String tag) {
-        int[] settings = new int[2];
+        int[] settings = new int[]{
+                1, 0
+        };
         Cursor cursor = getReadableDatabase().rawQuery("SELECT count,scrollY FROM settings WHERE tag = ?", new String[]{tag});
 
         if (cursor.moveToNext()) {

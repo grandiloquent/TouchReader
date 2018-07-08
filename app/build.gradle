@@ -28,6 +28,7 @@ dependencies {
     compile 'org.jsoup:jsoup:1.10.3'
     compile 'com.itextpdf:itextg:5.5.10'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile 'com.squareup.okhttp3:okhttp:3.10.0'
 }
 repositories {
     mavenCentral()
