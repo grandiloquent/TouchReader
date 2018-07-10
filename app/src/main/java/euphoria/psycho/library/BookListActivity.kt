@@ -79,8 +79,7 @@ class BookListActivity : Activity() {
         builder.setView(editText)
         builder.setNegativeButton("取消") { dialogInterface, i -> dialogInterface.dismiss() }
 
-        builder.setPositiveButton("确定", DialogInterface.OnClickListener {
-            dialogInterface, i ->
+        builder.setPositiveButton("确定", DialogInterface.OnClickListener { dialogInterface, _ ->
             if (editText.text == null) return@OnClickListener
             DataProvider.getInstance().updateTag(tag, editText.text.toString().trim())
             dialogInterface.dismiss()
@@ -110,8 +109,7 @@ class BookListActivity : Activity() {
         mBookAdapter = BookAdapter()
 
         mListView?.adapter = mBookAdapter
-        mListView?.onItemClickListener = AdapterView.OnItemClickListener {
-            _, _, position, id ->
+        mListView?.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, id ->
 
             val bundle = Intent()
             bundle.putExtra(MainActivity.KEY_TAG, mList!![position]);
@@ -161,18 +159,18 @@ class BookListActivity : Activity() {
 
     private inner class BookAdapter : BaseAdapter() {
 
-        val inflater = LayoutInflater.from(this@BookListActivity)
 
         override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View? {
             var view = p1
             val viewHolder: ViewHolder
             if (view == null) {
                 view = inflater.inflate(R.layout.list_item, p2, false)
-                viewHolder = ViewHolder()
-                viewHolder.textView = view?.findViewById(R.id.title)
+                viewHolder = ViewHolder().also {
+                    it.textView = view?.findViewById(R.id.title)
+                }
                 view?.tag = viewHolder
             } else {
-                viewHolder = view?.tag as ViewHolder
+                viewHolder = view.tag as ViewHolder
             }
             viewHolder.textView?.text = mList?.get(p0)
             return view
@@ -187,8 +185,11 @@ class BookListActivity : Activity() {
         }
 
         fun switchData(list: List<String>) {
-            mList?.clear()
-            mList?.addAll(list)
+            mList?.run {
+                clear()
+                addAll(list)
+            }
+
             notifyDataSetChanged()
         }
 

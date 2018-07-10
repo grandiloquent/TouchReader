@@ -22,7 +22,7 @@ import android.widget.TextView
 import java.io.File
 import java.util.regex.Pattern
 
-class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
+class MainActivity : Activity(), ReaderView.SelectListener {
 
     var mSelectPicPopupWindow: SelectPicPopupWindow? = null
     var mReaderView: ReaderView? = null
@@ -35,7 +35,7 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
 
     private fun initialize() {
         // Initialize the database
-        DataProvider.getInstance(this);
+        DataProvider.getInstance(this)
 
         setContentView(R.layout.main_activity)
 
@@ -43,18 +43,20 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
         mScrollView = findViewById(R.id.scrollView)
 
         mReaderView = findViewById(R.id.readerView)
-        mReaderView?.setSelectListener(this)
+        mReaderView?.let {
+            it.setSelectListener(this)
+        }
 
         initializeToolbar()
 
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        applySettings(sharedPreferences)
-        loadLasted(null, sharedPreferences)
+
+        applySettings(preferences)
+        loadLasted(null, preferences)
     }
 
     private fun initializeToolbar() {
-        findViewById<View>(R.id.back).setOnClickListener { _ -> back() }
+        findViewById<View>(R.id.back).setOnClickListener { back() }
         findViewById<View>(R.id.forward).setOnClickListener { _ -> forward() }
         findViewById<View>(R.id.menu).setOnClickListener { _ -> showMenuPanel() }
         findViewById<View>(R.id.search).setOnClickListener { _ -> searchInBooks() }
@@ -73,42 +75,42 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
         }
     }
 
-    fun menuFontSizeDecrease() {
-        val shared = PreferenceManager.getDefaultSharedPreferences(this)
-        var fontSize = shared.getFloat(KEY_FONTSIZE, 0f)
+    private fun menuFontSizeDecrease() {
+
+        var fontSize = preferences.getFloat(KEY_FONTSIZE, 0f)
         if (fontSize == 0f || fontSize - 0.5f < 0f) return
         fontSize = fontSize - 0.5f
-        shared.edit().putFloat(KEY_FONTSIZE, fontSize).commit()
+        preferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit()
         mReaderView!!.textSize = fontSize * resources.displayMetrics.scaledDensity
     }
 
     private fun menuFontSizeIncrease() {
-        val shared = PreferenceManager.getDefaultSharedPreferences(this)
-        var fontSize = shared.getFloat(KEY_FONTSIZE, 0f)
+
+        var fontSize = preferences.getFloat(KEY_FONTSIZE, 0f)
 
         fontSize = fontSize + 0.5f
-        shared.edit().putFloat(KEY_FONTSIZE, fontSize).commit()
+        preferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit()
         mReaderView!!.textSize = fontSize * resources.displayMetrics.scaledDensity
     }
 
     private fun menuSetPadding() {
-        val shared = PreferenceManager.getDefaultSharedPreferences(this)
-        dialog("${shared.getInt(KEY_PADDING, 0)}", "设置边间距") {
+
+        dialog("${preferences.getInt(KEY_PADDING, 0)}", "设置边间距") {
             val v = it.toIntSafe()
             if (v > 0) {
                 mReaderView?.setPadding(v, v, v, v)
-                shared.edit().putInt(KEY_PADDING, v).commit()
+                preferences.edit().putInt(KEY_PADDING, v).commit()
             }
         }
     }
 
     private fun menuSetLineSpace() {
-        val shared = PreferenceManager.getDefaultSharedPreferences(this)
-        dialog("${shared.getInt(KEY_LINESPACINGMULTIPLIER, 0)}", "设置行间距") {
+
+        dialog("${preferences.getInt(KEY_LINESPACINGMULTIPLIER, 0)}", "设置行间距") {
             val v = it.toFloatSafe()
             if (v > 0) {
                 mReaderView?.setLineSpacing(0f, v)
-                shared.edit().putFloat(KEY_LINESPACINGMULTIPLIER, v).commit()
+                preferences.edit().putFloat(KEY_LINESPACINGMULTIPLIER, v).commit()
             }
         }
     }
@@ -151,7 +153,7 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
         if (mSearchList != null) {
             if (mSearchCount - 1 > -1) {
                 renderText(mTag, mSearchList!![--mSearchCount], 0)
-                implementSearchHighLight(PreferenceManager.getDefaultSharedPreferences(this).getString(KEY_PATTERN, null))
+                implementSearchHighLight(preferences.getString(KEY_PATTERN, null))
                 toast("当前位置：${mSearchList!![mSearchCount]}")
             }
             return
@@ -166,7 +168,7 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
         if (mSearchList != null) {
             if (mSearchCount + 1 < mSearchList!!.size) {
                 renderText(mTag, mSearchList!![++mSearchCount], 0)
-                implementSearchHighLight(PreferenceManager.getDefaultSharedPreferences(this).getString(KEY_PATTERN, null))
+                implementSearchHighLight(preferences.getString(KEY_PATTERN, null))
                 toast("当前位置：${mSearchList!![mSearchCount]}")
             }
             return
@@ -185,23 +187,22 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
     }
 
     fun menuSetFontSize() {
-        val shared = PreferenceManager.getDefaultSharedPreferences(this)
 
-        dialog("${shared.getFloat(KEY_FONTSIZE, 0f)}", "设置字体大小", {
+        dialog("${preferences.getFloat(KEY_FONTSIZE, 0f)}", "设置字体大小") {
             var s = it.toFloatSafe()
             if (s > 0f) {
-                shared.edit().putFloat(KEY_FONTSIZE, s).commit()
-                mReaderView?.setTextSize(s * resources.displayMetrics.scaledDensity)
+                preferences.edit().putFloat(KEY_FONTSIZE, s).commit()
+                mReaderView?.textSize = s * resources.displayMetrics.scaledDensity
             }
-        })
+        }
     }
 
     private fun searchInBooks() {
         if (mTag == null) return
         resetSearch()
-        var shared = PreferenceManager.getDefaultSharedPreferences(this)
+
         val et = EditText(this)
-        et.setText(shared.getString(KEY_PATTERN, null))
+        et.setText(preferences.getString(KEY_PATTERN, null))
 
         val b = AlertDialog.Builder(this)
                 .setView(et)
@@ -210,7 +211,7 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
                     val v = et.text.toString()
                     if (v.isNullOrBlank()) return@setPositiveButton
                     try {
-                        shared.edit().putString(KEY_PATTERN, v.trim()).commit()
+                        preferences.edit().putString(KEY_PATTERN, v.trim()).commit()
                         mSearchList = DataProvider.getInstance().queryMatchesContent(mTag, Pattern.compile(v.trim()))
                         if (mSearchList != null) {
                             val y = mScrollView?.scrollY ?: 0
@@ -245,14 +246,14 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
             val span = BackgroundColorSpan(Color.YELLOW)
             linkifiedText.setSpan(span, start, end, 0)
         }
-        mReaderView?.setText(linkifiedText)
+        mReaderView?.text = linkifiedText
         mReaderView?.bringPointIntoView(mScrollView!!, offset)
 
     }
 
     private fun renderText(tag: String?, count: Int, scrollY: Int) {
         val v = DataProvider.getInstance().queryContent(tag, count)
-        mReaderView?.text = v;
+        mReaderView?.text = v
         if (scrollY > -1)
             mScrollView?.post { mScrollView?.scrollTo(0, scrollY) }
     }
@@ -260,10 +261,10 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
     fun loadLasted(tag: String?, sharedPreferences: SharedPreferences) {
 
         val t = tag ?: sharedPreferences.getString(KEY_TAG, null) ?: return
-        mTag = t;
+        mTag = t
 
         val lastedPosition = DataProvider.getInstance().querySettings(t)
-        var count = 1;
+        var count = 1
         var y = 0
         if (lastedPosition.size > 1) {
             count = lastedPosition[0]
@@ -280,11 +281,11 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
         if (typeface != null) {
             val tf = File(typeface)
             if (tf.isFile)
-                mReaderView?.setTypeface(Typeface.createFromFile(tf))
+                mReaderView?.typeface = Typeface.createFromFile(tf)
         }
 
         val fontSize = sharedPreferences.getFloat(KEY_FONTSIZE, 0f)
-        if (fontSize > 0f) mReaderView?.setTextSize(fontSize * resources.displayMetrics.scaledDensity)
+        if (fontSize > 0f) mReaderView?.textSize = fontSize * resources.displayMetrics.scaledDensity
 
         val padding = sharedPreferences.getInt(KEY_PADDING, 0)
         if (padding > 0) mReaderView?.setPadding(padding, padding, padding, padding)
@@ -308,13 +309,10 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
         }
     }
 
-    override fun onPostExecute(result: String?) {
-        mDicTextView?.setText(result)
-    }
 
     override fun onPause() {
         if (mTag != null) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(KEY_TAG, mTag).commit()
+            preferences.edit().putString(KEY_TAG, mTag).commit()
             val y = mScrollView?.scrollY ?: 0
             DataProvider.getInstance().updateSettings(mTag, mCount, y)
         }
@@ -323,12 +321,14 @@ class MainActivity : Activity(), ReaderView.SelectListener, TaskListener {
 
     override fun onSelectionChange(value: String?) {
         if (!value.isNullOrEmpty()) {
-            DictionaryTask(this).execute(value)
+            DictionaryTask { v -> mDicTextView?.text = v }.execute(value)
         }
     }
 
     override fun onClick() {
-        mDicTextView?.setText(null)
+        mDicTextView?.apply {
+            text = null
+        }
     }
 
 

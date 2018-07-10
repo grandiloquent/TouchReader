@@ -8,15 +8,18 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-interface TaskListener {
-    fun onPostExecute(result: String?)
-}
 
-class DictionaryTask(val listener: TaskListener) : AsyncTask<String, Void, String>() {
+class DictionaryTask(val listener: (v: String?) -> Unit) : AsyncTask<String, Void, String>() {
+    companion object {
+        private const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36"
+        private const val ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+        private const val CHINESE_PATTERN = "[\u4E00-\u9FA5]"
+    }
+
     override fun doInBackground(vararg query: String?): String? {
-        val word = query?.get(0) ?: return null
+        val word = query.get(0) ?: return null
 
-        var r = Regex("[\u4E00-\u9FA5]")
+        var r = Regex(CHINESE_PATTERN)
         var m = r.find(word);
         if (m != null && m.groups.size > 0) {
             return queryFromBing(word)
@@ -26,7 +29,7 @@ class DictionaryTask(val listener: TaskListener) : AsyncTask<String, Void, Strin
     }
 
     override fun onPostExecute(result: String?) {
-        listener.onPostExecute(result)
+        listener(result)
     }
 
     fun queryFromBing(word: String): String? {
@@ -42,8 +45,8 @@ class DictionaryTask(val listener: TaskListener) : AsyncTask<String, Void, Strin
                 .build()
         val req = Request.Builder()
                 .url(url)
-                .addHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36")
+                .addHeader("accept", ACCEPT)
+                .addHeader("user-agent", USER_AGENT)
                 .build()
 
         val res = okHttpClient.newCall(req).execute()
@@ -72,8 +75,8 @@ class DictionaryTask(val listener: TaskListener) : AsyncTask<String, Void, Strin
                 .build()
         val req = Request.Builder()
                 .url(url)
-                .addHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36")
+                .addHeader("accept", ACCEPT)
+                .addHeader("user-agent", USER_AGENT)
                 .build()
 
         val res = okHttpClient.newCall(req).execute()

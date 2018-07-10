@@ -2,17 +2,32 @@ package euphoria.psycho.library
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import java.io.File
 
-
+/*
+Context
+ */
 val Context.screenWidth: Int
-    get() {
-        return applicationContext.resources.displayMetrics.widthPixels
-    }
+    get() = applicationContext.resources.displayMetrics.widthPixels
+val Context.screenHeight: Int
+    get() = applicationContext.resources.displayMetrics.heightPixels
+val Context.preferences: SharedPreferences
+    get() = PreferenceManager.getDefaultSharedPreferences(this)
+val Context.inflater: LayoutInflater
+    get() = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+inline fun <reified T : Any> Context.getIntent() = Intent(this, T::class.java)
+
+inline fun <reified T : Any> Context.startActivity() = startActivity(getIntent<T>())
 
 fun Context.dp2x(dp: Float): Int {
     val scale = applicationContext.resources.displayMetrics.density
@@ -44,6 +59,13 @@ fun Context.dialog(strValue: String, title: String?, listener: (v: String) -> Un
     b.show()
 }
 
+/*
+TextView
+ */
+val TextView.trimmedText: String
+    get() = text.toString().trim()
+
+
 fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
     val line = this.layout.getLineForOffset(offset).toFloat()
     val y = ((line + 0.5) * this.lineHeight).toInt()
@@ -65,4 +87,12 @@ fun String.toFloatSafe(): Float {
     return if (m != null) {
         return m.value.toFloat()
     } else -1f
+}
+
+/*
+File
+ */
+fun File.deletes() {
+    if (isDirectory)
+        walkBottomUp().forEach { it.delete() }
 }

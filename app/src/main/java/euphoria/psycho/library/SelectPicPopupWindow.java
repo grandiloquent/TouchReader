@@ -57,7 +57,7 @@ public class SelectPicPopupWindow extends PopupWindow {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 //利用布局生成view
         mMenuView = inflater.inflate(R.layout.popwindow_choose_icon, null);
-        image_gv = (GridView) mMenuView.findViewById(R.id.image_gv);
+        image_gv = (GridView) mMenuView.findViewById(R.id.gridview);
 //新建List
         data_list = new ArrayList<Map<String, Object>>();
 //获取数据
@@ -67,9 +67,7 @@ public class SelectPicPopupWindow extends PopupWindow {
         int[] to = {R.id.image, R.id.text};
         sim_adapter = new SimpleAdapter(context, data_list, R.layout.item_pic_gv, from, to);
 //配置适配器
-        image_gv.setNumColumns(3);
-        image_gv.setVerticalSpacing(5);
-       image_gv.setHorizontalSpacing(10);
+
         image_gv.setAdapter(sim_adapter);
 
 //设置按钮监听
