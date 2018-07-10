@@ -95,4 +95,6 @@ File
 fun File.deletes() {
     if (isDirectory)
         walkBottomUp().forEach { it.delete() }
+    else
+        delete()
 }

@@ -4,13 +4,42 @@ import android.os.Environment;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class FileUtils {
 
     public static String getFileNameWithoutExtension(String path) {
         return path.replaceFirst("[.][^.]+$", "");
+    }
+
+    public static String cutLastSegmentOfPath(String path) {
+        if (path.length() - path.replace("/", "").length() <= 1)
+            return "/";
+        String newPath = path.substring(0, path.lastIndexOf("/"));
+        // We don't need to list the content of /storage/emulated
+        if (newPath.equals("/storage/emulated"))
+            newPath = "/storage";
+        return newPath;
+    }
+
+    public static ArrayList<File> getFileListByDirPath(String path, FileFilter filter) {
+        File directory = new File(path);
+        ArrayList<File> result = new ArrayList<>();
+        File[] files = directory.listFiles(filter);
+
+        if (files == null) {
+            return new ArrayList<>();
+        }
+        for (File f : files) {
+            result.add(f);
+        }
+
+        Collections.sort(result, new FileComparator());
+        return result;
     }
 
     public static void fileCombine(String destinationFileName, String[] files) {
