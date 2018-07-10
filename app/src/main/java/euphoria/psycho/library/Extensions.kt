@@ -5,13 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import java.io.File
+import java.io.FileFilter
+import java.util.*
 
 /*
 Context
@@ -97,4 +98,15 @@ fun File.deletes() {
         walkBottomUp().forEach { it.delete() }
     else
         delete()
+}
+
+fun File.getFileListByDirPath(filter: FileFilter): ArrayList<File> {
+    val arrayList = ArrayList<File>()
+    if (isFile) return arrayList
+    val files = listFiles(filter)
+    if (files == null) arrayList
+    for (f in files) arrayList.add(f)
+
+    arrayList.sortWith(compareBy<File> { it.isFile }.thenBy { it.name })
+    return arrayList
 }

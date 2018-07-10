@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.text.SpannableStringBuilder
 import android.text.style.BackgroundColorSpan
 import android.util.Log
@@ -24,7 +23,9 @@ import java.util.regex.Pattern
 
 class MainActivity : Activity(), ReaderView.SelectListener {
 
-    var mSelectPicPopupWindow: SelectPicPopupWindow? = null
+    //var mSelectPicPopupWindow: SelectPicPopupWindow? = null
+
+    var mMenuPanel: MenuPanel? = null
     var mReaderView: ReaderView? = null
     var mCount = 0
     var mTag: String? = null
@@ -116,34 +117,35 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     }
 
     private fun showMenuPanel() {
-        val resources = resources
-        mSelectPicPopupWindow = SelectPicPopupWindow(this,
+
+        mMenuPanel = MenuPanel(this,
                 intArrayOf(R.mipmap.ic_arrow_forward_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_apps_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp),
-                arrayOf(resources.getString(R.string.menu_jump_to), resources.getString(R.string.menu_font_size), resources.getString(R.string.menu_file_list), resources.getString(R.string.menu_font_decrease), resources.getString(R.string.menu_font_increase), resources.getString(R.string.menu_change_dictionary), resources.getString(R.string.menu_set_padding), resources.getString(R.string.menu_set_line)),
-                AdapterView.OnItemClickListener { adapterView, view, i, l ->
-                    mSelectPicPopupWindow!!.dismiss()
-                    if (i == 0) {
-                        menuJumpTo()
-                    } else if (i == 1) {
-                        menuSetFontSize()
-                    } else if (i == 2) {
-                        val intent = Intent(MainActivity@ this, FileActivity::class.java)
-                        startActivity(intent)
-                    } else if (i == 3) {
-                        menuFontSizeDecrease()
+                arrayOf(resources.getString(R.string.menu_jump_to), resources.getString(R.string.menu_font_size), resources.getString(R.string.menu_file_list), resources.getString(R.string.menu_font_decrease), resources.getString(R.string.menu_font_increase), resources.getString(R.string.menu_change_dictionary), resources.getString(R.string.menu_set_padding), resources.getString(R.string.menu_set_line))) {
+            mMenuPanel?.dismiss()
+            if (it == 0) {
+                menuJumpTo()
+            } else if (it == 1) {
+                menuSetFontSize()
+            } else if (it == 2) {
+                val intent = Intent(MainActivity@ this, FileActivity::class.java)
+                startActivity(intent)
+            } else if (it == 3) {
+                menuFontSizeDecrease()
 
-                    } else if (i == 4) {
-                        menuFontSizeIncrease()
-                    } else if (i == 5) {
+            } else if (it == 4) {
+                menuFontSizeIncrease()
+            } else if (it == 5) {
 
-                    } else if (i == 6) {
-                        menuSetPadding()
-                    } else if (i == 7) {
-                        menuSetLineSpace()
-                    }
-                })
+            } else if (it == 6) {
+                menuSetPadding()
+            } else if (it == 7) {
+                menuSetLineSpace()
+            }
+
+        }
+        mMenuPanel?.showAtLocation(this.findViewById(R.id.layout), Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 0)
         //显示窗口,设置layout在PopupWindow中显示的位置
-        mSelectPicPopupWindow!!.showAtLocation(this.findViewById(R.id.layout), Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 0)
+        //mSelectPicPopupWindow!!.showAtLocation(this.findViewById(R.id.layout), Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 0)
 
     }
 

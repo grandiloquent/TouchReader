@@ -2,8 +2,6 @@ package euphoria.psycho.library
 
 import android.content.Context
 import android.graphics.Point
-import android.os.Parcel
-import android.os.Parcelable
 import android.view.MotionEvent
 import android.view.View
 

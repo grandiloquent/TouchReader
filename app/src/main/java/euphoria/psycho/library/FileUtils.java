@@ -2,13 +2,19 @@ package euphoria.psycho.library;
 
 import android.os.Environment;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 public class FileUtils {
 
@@ -26,21 +32,23 @@ public class FileUtils {
         return newPath;
     }
 
-    public static ArrayList<File> getFileListByDirPath(String path, FileFilter filter) {
-        File directory = new File(path);
-        ArrayList<File> result = new ArrayList<>();
-        File[] files = directory.listFiles(filter);
-
-        if (files == null) {
-            return new ArrayList<>();
-        }
-        for (File f : files) {
-            result.add(f);
-        }
-
-        Collections.sort(result, new FileComparator());
-        return result;
-    }
+//
+//
+//    public static ArrayList<File> getFileListByDirPath(String path, FileFilter filter) {
+//        File directory = new File(path);
+//        ArrayList<File> result = new ArrayList<>();
+//        File[] files = directory.listFiles(filter);
+//
+//        if (files == null) {
+//            return new ArrayList<>();
+//        }
+//        for (File f : files) {
+//            result.add(f);
+//        }
+//
+//        Collections.sort(result, new FileComparator());
+//        return result;
+//    }
 
     public static void fileCombine(String destinationFileName, String[] files) {
         try {

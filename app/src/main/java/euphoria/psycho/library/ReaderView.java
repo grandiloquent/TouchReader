@@ -3,8 +3,8 @@ package euphoria.psycho.library;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.AttributeSet;
-import android.view.*;
-import android.widget.TextView;
+import android.view.MotionEvent;
+import android.view.View;
 
 import java.text.BreakIterator;
 
