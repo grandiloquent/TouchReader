@@ -13,6 +13,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import kotlinx.android.synthetic.main.activity_book.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.find
 
 class BookListActivity : AppCompatActivity(), ToolbarManager {
@@ -33,6 +36,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         menu?.apply {
             add(0, MENU_ADD_CLIPBOARD, 0, R.string.add_from_clipboard)
+            add(0, MENU_ADD_FROM_URL, 0, "从网络添加")
             add(0, MENU_CHANGE_TAG, 0, R.string.change_tag)
             add(0, MENU_DELETE_TAG, 0, R.string.context_menu_delete)
         }
@@ -102,7 +106,34 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
                     deleteByTag(mBookListAdapter!!.getBook(position))
                 return true
             }
+            MENU_ADD_FROM_URL -> {
+                addFromURL(mBookListAdapter!!.getBook(position))
+                return true
+            }
             else -> return true
+        }
+
+    }
+
+    fun addFromURL(tag: String) {
+
+        dialog("", "输入相应的网址") {
+            addFromURLImplement(it, tag)
+        }
+
+    }
+
+    fun addFromURLImplement(url: String, tag: String) {
+        async(UI) {
+            var result = bg { url.fetchString() }
+            updateDatabase(tag, result.await())
+        }
+    }
+
+    fun updateDatabase(tag: String, content: String?) {
+
+        content?.let {
+            DataProvider.instance.addFromClipboard(tag, content)
         }
 
     }
@@ -149,6 +180,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     }
 
     companion object {
+        private val MENU_ADD_FROM_URL = 3
         private val MENU_ADD_CLIPBOARD = 0
         private val MENU_CHANGE_TAG = 1
         private val MENU_DELETE_TAG = 2

@@ -1,4 +1,5 @@
 package euphoria.psycho.library
+
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -6,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.*
 import java.io.File
 import java.io.FileFilter
+
 class DirectoryFragment : Fragment() {
     var mEmptyView: View? = null
     var mPath: String? = null
@@ -26,6 +28,7 @@ class DirectoryFragment : Fragment() {
             }
         }
     }
+
     fun initializeFilesList() {
         mDirectoryAdapter = DirectoryAdapter(context!!, File(mPath).getFileListByDirPath(mCompositeFilter!!)) { _, p ->
             mFileClickListener?.let {
@@ -38,29 +41,35 @@ class DirectoryFragment : Fragment() {
             setEmptyView(mEmptyView)
         }
     }
+
     fun refresh() {
         mDirectoryAdapter?.switchData(File(mPath).getFileListByDirPath(mCompositeFilter!!))
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeArgs()
         initializeFilesList()
         registerForContextMenu(mEmptyRecyclerView)
     }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_directory, container, false)
         mEmptyRecyclerView = view.findViewById(R.id.directory_recycler_view)
         mEmptyView = view.findViewById(R.id.directory_empty_view)
         return view
     }
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         mFileClickListener = context as FileClickListener
     }
+
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         activity?.menuInflater?.inflate(R.menu.menu_file_context, menu)
         super.onCreateContextMenu(menu, v, menuInfo)
     }
+
     override fun onContextItemSelected(item: MenuItem?): Boolean {
         val i = item?.menuInfo as EmptyRecyclerView.RecyclerViewContextMenuInfo
         when (item?.itemId) {
@@ -75,13 +84,32 @@ class DirectoryFragment : Fragment() {
                 }
                 true
             }
+            R.id.action_convert_to_txt -> {
+                mDirectoryAdapter?.getModel(i.position)?.let {
+                    convertToTextFile(it)
+                }
+                true
+            }
         }
         return super.onContextItemSelected(item)
     }
+
+    fun convertToTextFile(f: File) {
+        if (!f.isFile) return
+        var htmRegex = Regex("\\.(?:html|htm|xhtml)$")
+
+        if (htmRegex.containsMatchIn(f.name)) {
+            val t = File(f.absolutePath.substringBeforeLast('.') + ".txt")
+            t.writeText(f.readText().htm2txt())
+            refresh()
+        }
+    }
+
     override fun onDetach() {
         super.onDetach()
         mFileClickListener = null
     }
+
     companion object {
         private const val ARG_FILE_PATH = "arg_file_path"
         private const val ARG_FILTER = "arg_filter"
