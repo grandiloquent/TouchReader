@@ -1,21 +1,15 @@
 package euphoria.psycho.library
-
 import android.content.Context
 import android.graphics.Point
 import android.view.MotionEvent
 import android.view.View
-
 class BookView(context: Context) : View(context) {
-
     val mScreenWidth: Int
     val mScreenHeight: Int
-
     init {
         mScreenWidth = resources.displayMetrics.widthPixels
         mScreenHeight = resources.displayMetrics.heightPixels
-
     }
-
     var et = 0L
     var dx = 0
     var dy = 0
@@ -23,7 +17,6 @@ class BookView(context: Context) : View(context) {
     var actionDownX = 0
     var actionDownY = 0
     var center = false
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {

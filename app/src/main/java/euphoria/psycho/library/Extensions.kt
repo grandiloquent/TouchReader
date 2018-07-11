@@ -1,5 +1,4 @@
 package euphoria.psycho.library
-
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -13,7 +12,6 @@ import android.widget.Toast
 import java.io.File
 import java.io.FileFilter
 import java.util.*
-
 /*
 Context
  */
@@ -25,28 +23,21 @@ val Context.preferences: SharedPreferences
     get() = PreferenceManager.getDefaultSharedPreferences(this)
 val Context.inflater: LayoutInflater
     get() = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
 inline fun <reified T : Any> Context.getIntent() = Intent(this, T::class.java)
-
 inline fun <reified T : Any> Context.startActivity() = startActivity(getIntent<T>())
-
 fun Context.dp2x(dp: Float): Int {
     val scale = applicationContext.resources.displayMetrics.density
     return (dp * scale + .5f).toInt()
 }
-
 fun Context.toast(message: String, isShort: Boolean = true) {
     if (isShort)
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     else
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-
 }
-
 fun Context.dialog(strValue: String, title: String?, listener: (v: String) -> Unit) {
     val et = EditText(this)
     et.setText(strValue)
-
     val b = AlertDialog.Builder(this)
             .setView(et)
             .setNegativeButton("取消") { d, _ -> d.dismiss() }
@@ -59,21 +50,17 @@ fun Context.dialog(strValue: String, title: String?, listener: (v: String) -> Un
     }
     b.show()
 }
-
 /*
 TextView
  */
 val TextView.trimmedText: String
     get() = text.toString().trim()
-
-
 fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
     val line = this.layout.getLineForOffset(offset).toFloat()
     val y = ((line + 0.5) * this.lineHeight).toInt()
     scrollView.post { scrollView.scrollTo(0, y - scrollView.height / 2) }
 }
 /*String*/
-
 //fun String.toIntSafe(): Int {
 //    val r = Regex("[0-9]+")
 //    val m = r.find(this)
@@ -89,7 +76,6 @@ fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
 //        return m.value.toFloat()
 //    } else -1f
 //}
-
 /*
 File
  */
@@ -99,14 +85,12 @@ fun File.deletes() {
     else
         delete()
 }
-
 fun File.getFileListByDirPath(filter: FileFilter): ArrayList<File> {
     val arrayList = ArrayList<File>()
     if (isFile) return arrayList
     val files = listFiles(filter)
     if (files == null) arrayList
     for (f in files) arrayList.add(f)
-
     arrayList.sortWith(compareBy<File> { it.isFile }.thenBy { it.name })
     return arrayList
 }

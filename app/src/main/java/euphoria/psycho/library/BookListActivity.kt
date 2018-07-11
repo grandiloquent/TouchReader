@@ -1,5 +1,4 @@
 package euphoria.psycho.library
-
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ClipboardManager
@@ -9,40 +8,30 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.*
-
-
 class BookListActivity : Activity() {
-
     private var mList: MutableList<String>? = null
     private var mListView: ListView? = null
     private var mBookAdapter: BookAdapter? = null
-
     companion object {
         private val MENU_ADD_CLIPBOARD = 0
         private val MENU_CHANGE_TAG = 1
         private val MENU_DELETE_TAG = 2
         private val TAG = "BookListActivity"
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize()
     }
-
-
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         menu?.add(0, MENU_ADD_CLIPBOARD, 0, R.string.add_from_clipboard)
         menu?.add(0, MENU_CHANGE_TAG, 0, R.string.change_tag)
         menu?.add(0, MENU_DELETE_TAG, 0, R.string.context_menu_delete)
-
         super.onCreateContextMenu(menu, v, menuInfo)
     }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menu?.add(0, MENU_ADD_CLIPBOARD, 0, R.string.add_from_clipboard)
         return super.onCreateOptionsMenu(menu)
     }
-
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             MENU_ADD_CLIPBOARD -> {
@@ -52,9 +41,7 @@ class BookListActivity : Activity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
     override fun onContextItemSelected(item: MenuItem?): Boolean {
-
         when (item?.itemId) {
             MENU_ADD_CLIPBOARD -> {
                 addFromClipboard(mList!![getPosition(item)])
@@ -71,16 +58,12 @@ class BookListActivity : Activity() {
         }
         return super.onContextItemSelected(item)
     }
-
     fun changeTag(tag: String) {
         var editText = EditText(this)
         editText.setText(tag)
-
         val builder = AlertDialog.Builder(this)
-
         builder.setView(editText)
         builder.setNegativeButton("取消") { dialogInterface, i -> dialogInterface.dismiss() }
-
         builder.setPositiveButton("确定", DialogInterface.OnClickListener { dialogInterface, _ ->
             if (editText.text == null) return@OnClickListener
             DataProvider.instance.updateTag(tag, editText.text.toString().trim())
@@ -89,31 +72,25 @@ class BookListActivity : Activity() {
         })
         builder.show()
     }
-
     fun deleteByTag(tag: String) {
         DataProvider.instance.deleteByTag(tag);
         refreshListView();
     }
-
     fun refreshListView() {
         mBookAdapter?.switchData(DataProvider.instance.listTag())
     }
-
     fun getPosition(item: MenuItem?): Int {
         val menuInfo = item?.menuInfo as AdapterView.AdapterContextMenuInfo
         return menuInfo.position
     }
-
     private fun initialize() {
         setContentView(R.layout.booklis_activity)
         mList = ArrayList<String>()
         mList?.addAll(DataProvider.instance.listTag())
         mListView = findViewById(R.id.listView)
         mBookAdapter = BookAdapter()
-
         mListView?.adapter = mBookAdapter
         mListView?.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, id ->
-
             val bundle = Intent()
             bundle.putExtra(MainActivity.KEY_TAG, mList!![position]);
             setResult(RESULT_OK, bundle)
@@ -121,15 +98,11 @@ class BookListActivity : Activity() {
         }
         registerForContextMenu(mListView)
     }
-
     fun toast(context: Context, message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
-
     fun addFromClipboard(tag: String) {
-
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
         if (!clipboardManager.hasPrimaryClip()) return
         if (clipboardManager.primaryClip.itemCount > 0) {
             val text = clipboardManager.primaryClip.getItemAt(0).text;
@@ -140,11 +113,8 @@ class BookListActivity : Activity() {
             }
         }
     }
-
     fun addFromClipboard() {
-
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
         if (!clipboardManager.hasPrimaryClip()) return
         if (clipboardManager.primaryClip.itemCount > 0) {
             val text = clipboardManager.primaryClip.getItemAt(0).text;
@@ -154,15 +124,10 @@ class BookListActivity : Activity() {
             }
         }
     }
-
     private inner class ViewHolder {
         var textView: TextView? = null
     }
-
-
     private inner class BookAdapter : BaseAdapter() {
-
-
         override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View? {
             var view = p1
             val viewHolder: ViewHolder
@@ -178,27 +143,21 @@ class BookListActivity : Activity() {
             viewHolder.textView?.text = mList?.get(p0)
             return view
         }
-
         override fun getItem(p0: Int): String? {
             return mList?.get(p0)
         }
-
         override fun getItemId(p0: Int): Long {
             return p0.toLong()
         }
-
         fun switchData(list: List<String>) {
             mList?.run {
                 clear()
                 addAll(list)
             }
-
             notifyDataSetChanged()
         }
-
         override fun getCount(): Int {
             return mList!!.size
         }
-
     }
 }
