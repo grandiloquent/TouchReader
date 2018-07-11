@@ -95,21 +95,20 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     private fun menuSetPadding() {
 
         dialog("${preferences.getInt(KEY_PADDING, 0)}", "设置边间距") {
-            val v = it.toIntSafe()
-            if (v > 0) {
-                mReaderView?.setPadding(v, v, v, v)
-                preferences.edit().putInt(KEY_PADDING, v).commit()
+            it.toIntOrNull()?.let {
+                mReaderView?.setPadding(it, it, it, it)
+                preferences.edit().putInt(KEY_PADDING, it).commit()
             }
+
         }
     }
 
     private fun menuSetLineSpace() {
 
         dialog("${preferences.getInt(KEY_LINESPACINGMULTIPLIER, 0)}", "设置行间距") {
-            val v = it.toFloatSafe()
-            if (v > 0) {
-                mReaderView?.setLineSpacing(0f, v)
-                preferences.edit().putFloat(KEY_LINESPACINGMULTIPLIER, v).commit()
+            it.toFloatOrNull()?.let {
+                mReaderView?.setLineSpacing(0f, it)
+                preferences.edit().putFloat(KEY_LINESPACINGMULTIPLIER, it).commit()
             }
         }
     }
@@ -180,19 +179,20 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     fun menuJumpTo() {
         if (mTag == null) return
         dialog("$mCount", "1-${DataProvider.instance.queryCount(mTag!!)}") {
-            val count = it.toIntSafe()
-            renderText(mTag, count, 0)
-            mCount = count
+            it.toIntOrNull()?.let {
+                renderText(mTag, it, 0)
+                mCount = it
+            }
+
         }
     }
 
     fun menuSetFontSize() {
 
         dialog("${preferences.getFloat(KEY_FONTSIZE, 0f)}", "设置字体大小") {
-            var s = it.toFloatSafe()
-            if (s > 0f) {
-                preferences.edit().putFloat(KEY_FONTSIZE, s).commit()
-                mReaderView?.textSize = s * resources.displayMetrics.scaledDensity
+            it.toFloatOrNull()?.let {
+                preferences.edit().putFloat(KEY_FONTSIZE, it).commit()
+                mReaderView?.textSize = it * resources.displayMetrics.scaledDensity
             }
         }
     }

@@ -13,6 +13,23 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
         DataProvider.DATABASE_VERSION
 ) {
 
+
+    fun importFile(path: String) {
+        val file = File(path)
+        file.nameWithoutExtension
+        val list = file.readLines()
+        var sb = StringBuilder()
+        val length = 8000
+        for (line in list) {
+            if (sb.length < length)
+                sb.append(line)
+            else {
+
+            }
+
+        }
+    }
+
     fun addFromClipboard(tag: String, context: String) {
         val cursor = readableDatabase.query("document", arrayOf("count"), "tag=?", arrayOf(tag), null, null, "count DESC")
         var count = 1

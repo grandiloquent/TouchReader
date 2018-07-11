@@ -74,21 +74,21 @@ fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
 }
 /*String*/
 
-fun String.toIntSafe(): Int {
-    val r = Regex("[0-9]+")
-    val m = r.find(this)
-    return if (m != null) {
-        return m.value.toInt()
-    } else -1
-}
-
-fun String.toFloatSafe(): Float {
-    val r = Regex("[0-9\\.]+")
-    val m = r.find(this)
-    return if (m != null) {
-        return m.value.toFloat()
-    } else -1f
-}
+//fun String.toIntSafe(): Int {
+//    val r = Regex("[0-9]+")
+//    val m = r.find(this)
+//    return if (m != null) {
+//        return m.value.toInt()
+//    } else -1
+//}
+//
+//fun String.toFloatSafe(): Float {
+//    val r = Regex("[0-9\\.]+")
+//    val m = r.find(this)
+//    return if (m != null) {
+//        return m.value.toFloat()
+//    } else -1f
+//}
 
 /*
 File
