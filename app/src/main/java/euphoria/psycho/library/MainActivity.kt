@@ -25,6 +25,10 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     var mTag: String? = null
     var mSearchList: List<Int>? = null
     var mSearchCount = -1
+
+    var preferenceFontSize: Float by DelegatesExt.preference(this, KEY_FONT_SIZE, DEFAULT_FONT_SIZE)
+    var preferenceTypeFace: String by DelegatesExt.preference(this, KEY_TYPEFACE, "")
+
     private fun initialize() {
         setContentView(R.layout.main_activity)
         readerView.setSelectListener(this)
@@ -54,18 +58,16 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     }
 
     private fun menuFontSizeDecrease() {
-        var fontSize = preferences.getFloat(KEY_FONTSIZE, 0f)
-        if (fontSize == 0f || fontSize - 0.5f < 0f) return
-        fontSize = fontSize - 0.5f
-        preferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit()
-        readerView.textSize = fontSize * resources.displayMetrics.scaledDensity
+        if (preferenceFontSize - .5f > 0f) {
+            preferenceFontSize = preferenceFontSize - 0.5f
+            readerView.textSize = preferenceFontSize * resources.displayMetrics.scaledDensity
+        }
     }
 
     private fun menuFontSizeIncrease() {
-        var fontSize = preferences.getFloat(KEY_FONTSIZE, 0f)
-        fontSize = fontSize + 0.5f
-        preferences.edit().putFloat(KEY_FONTSIZE, fontSize).commit()
-        readerView.textSize = fontSize * resources.displayMetrics.scaledDensity
+
+        preferenceFontSize = preferenceFontSize + 0.5f
+        readerView.textSize = preferenceFontSize * resources.displayMetrics.scaledDensity
     }
 
     private fun menuSetPadding() {
@@ -155,9 +157,9 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     }
 
     fun menuSetFontSize() {
-        dialog("${preferences.getFloat(KEY_FONTSIZE, 0f)}", "设置字体大小") {
+        dialog("${preferences.getFloat(KEY_FONT_SIZE, 0f)}", "设置字体大小") {
             it.toFloatOrNull()?.let {
-                preferences.edit().putFloat(KEY_FONTSIZE, it).commit()
+                preferenceFontSize = it
                 readerView.textSize = it * resources.displayMetrics.scaledDensity
             }
         }
@@ -228,8 +230,8 @@ class MainActivity : Activity(), ReaderView.SelectListener {
             var f = File(typeface)
             if (f.isFile) readerView.typeface = Typeface.createFromFile(f)
         }
-        val fontSize = sharedPreferences.getFloat(KEY_FONTSIZE, 0f)
-        if (fontSize > 0f) readerView.textSize = fontSize * resources.displayMetrics.scaledDensity
+
+        readerView.textSize = preferenceFontSize * resources.displayMetrics.scaledDensity
         val padding = sharedPreferences.getInt(KEY_PADDING, 0)
         if (padding > 0) readerView.setPadding(padding, padding, padding, padding)
         val lineSpacingMultiplier = sharedPreferences.getFloat(KEY_LINESPACINGMULTIPLIER, 0f)
@@ -291,7 +293,8 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         private const val REQUEST_PERMISSIONS_CODE = 1
         private const val REQUEST_BOOK_CODE = 2
         private const val TAG = "MainActivity"
-        private const val KEY_FONTSIZE = "fontsize"
+        private const val KEY_FONT_SIZE = "fontsize"
+        private const val DEFAULT_FONT_SIZE = 5f
         private const val KEY_PATTERN = "pattern"
         private const val KEY_PADDING = "padding"
         private const val KEY_LINESPACINGMULTIPLIER = "lineSpacingMultiplier"

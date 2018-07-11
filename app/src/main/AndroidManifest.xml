@@ -24,7 +24,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".BookListActivity"></activity>
+        <activity
+            android:name=".BookListActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
         <activity
             android:name=".FileActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>

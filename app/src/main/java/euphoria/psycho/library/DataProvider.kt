@@ -60,7 +60,7 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
         cursor.close()
         return list
     }
-    fun listTag(): List<String> {
+    fun listTag(): ArrayList<String> {
         val cursor = readableDatabase.rawQuery("SELECT DISTINCT tag FROM document ORDER BY tag", null);
         val list = ArrayList<String>();
         while (cursor.moveToNext()) {
