@@ -3,9 +3,6 @@ package euphoria.psycho.library;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.parser.PdfTextExtractor;
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
@@ -52,25 +49,25 @@ public class EbookUtils {
         return s + extension;
     }
 
-    public static String pdf2txt(String fileName) {
-        StringBuilder sb = new StringBuilder();
-        PdfReader reader = null;
-        try {
-            reader = new PdfReader(fileName);
-
-            int n = reader.getNumberOfPages();
-            for (int i = 0; i < n; i++) {
-                sb.append(PdfTextExtractor.getTextFromPage(reader, i + 1, new SimpleTextExtractionStrategy()).trim()).append('\n');
-                //Extracting the content from the different pages
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        reader.close();
-
-        return sb.toString();
-    }
+//    public static String pdf2txt(String fileName) {
+//        StringBuilder sb = new StringBuilder();
+//        PdfReader reader = null;
+//        try {
+//            reader = new PdfReader(fileName);
+//
+//            int n = reader.getNumberOfPages();
+//            for (int i = 0; i < n; i++) {
+//                sb.append(PdfTextExtractor.getTextFromPage(reader, i + 1, new SimpleTextExtractionStrategy()).trim()).append('\n');
+//                //Extracting the content from the different pages
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        reader.close();
+//
+//        return sb.toString();
+//    }
 
     public static void writeFile(String fileName, String content) {
 
@@ -86,49 +83,49 @@ public class EbookUtils {
 
     }
 
-    public static void renamPDFInDirectory(String fileName) {
-        File src = new File(fileName);
+//    public static void renamPDFInDirectory(String fileName) {
+//        File src = new File(fileName);
+//
+//        File[] files = src.listFiles(new FileFilter() {
+//            @Override
+//            public boolean accept(File file) {
+//                if (file.isFile() && file.getName().endsWith(".pdf")) return true;
+//                return false;
+//            }
+//        });
+//
+//        for (File f : files) {
+//            renamePDF(f);
+//        }
+//    }
 
-        File[] files = src.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                if (file.isFile() && file.getName().endsWith(".pdf")) return true;
-                return false;
-            }
-        });
-
-        for (File f : files) {
-            renamePDF(f);
-        }
-    }
-
-    public static void renamePDF(File src) {
-        try {
-            PdfReader pdfReader = new PdfReader(src.getAbsolutePath());
-            HashMap<String, String> hashMap = pdfReader.getInfo();
-
-            if (hashMap.containsKey("Title")) {
-
-                String targetFileName = hashMap.get("Title").replaceAll("[:?\"'\\-\n\r\t]+", " ");
-
-                File targetFile = new File(src.getParentFile(), targetFileName + ".pdf");
-
-                if (!targetFile.exists()) {
-                    src.renameTo(targetFile);
-                }
-            } else {
-                File targetFile = new File(src.getParentFile(), src.getName().replaceAll("-", " "));
-
-                if (!targetFile.exists()) {
-                    src.renameTo(targetFile);
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
+//    public static void renamePDF(File src) {
+//        try {
+//            PdfReader pdfReader = new PdfReader(src.getAbsolutePath());
+//            HashMap<String, String> hashMap = pdfReader.getInfo();
+//
+//            if (hashMap.containsKey("Title")) {
+//
+//                String targetFileName = hashMap.get("Title").replaceAll("[:?\"'\\-\n\r\t]+", " ");
+//
+//                File targetFile = new File(src.getParentFile(), targetFileName + ".pdf");
+//
+//                if (!targetFile.exists()) {
+//                    src.renameTo(targetFile);
+//                }
+//            } else {
+//                File targetFile = new File(src.getParentFile(), src.getName().replaceAll("-", " "));
+//
+//                if (!targetFile.exists()) {
+//                    src.renameTo(targetFile);
+//                }
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 
     private static String streamToString(InputStream inputStream) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
