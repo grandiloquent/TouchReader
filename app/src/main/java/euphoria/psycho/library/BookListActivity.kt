@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.*
 
+
 class BookListActivity : Activity() {
 
     private var mList: MutableList<String>? = null
@@ -27,6 +28,7 @@ class BookListActivity : Activity() {
         super.onCreate(savedInstanceState)
         initialize()
     }
+
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         menu?.add(0, MENU_ADD_CLIPBOARD, 0, R.string.add_from_clipboard)
@@ -81,7 +83,7 @@ class BookListActivity : Activity() {
 
         builder.setPositiveButton("确定", DialogInterface.OnClickListener { dialogInterface, _ ->
             if (editText.text == null) return@OnClickListener
-            DataProvider.getInstance().updateTag(tag, editText.text.toString().trim())
+            DataProvider.instance.updateTag(tag, editText.text.toString().trim())
             dialogInterface.dismiss()
             refreshListView()
         })
@@ -89,12 +91,12 @@ class BookListActivity : Activity() {
     }
 
     fun deleteByTag(tag: String) {
-        DataProvider.getInstance().deleteByTag(tag);
+        DataProvider.instance.deleteByTag(tag);
         refreshListView();
     }
 
     fun refreshListView() {
-        mBookAdapter?.switchData(DataProvider.getInstance().listTag())
+        mBookAdapter?.switchData(DataProvider.instance.listTag())
     }
 
     fun getPosition(item: MenuItem?): Int {
@@ -104,7 +106,8 @@ class BookListActivity : Activity() {
 
     private fun initialize() {
         setContentView(R.layout.booklis_activity)
-        mList = DataProvider.getInstance().listTag()
+        mList = ArrayList<String>()
+        mList?.addAll(DataProvider.instance.listTag())
         mListView = findViewById(R.id.listView)
         mBookAdapter = BookAdapter()
 
@@ -131,7 +134,7 @@ class BookListActivity : Activity() {
         if (clipboardManager.primaryClip.itemCount > 0) {
             val text = clipboardManager.primaryClip.getItemAt(0).text;
             if (text != null) {
-                DataProvider.getInstance().addFromClipboard(tag, text.toString())
+                DataProvider.instance.addFromClipboard(tag, text.toString())
                 val message = "成功添加：%s".format(tag);
                 toast(this, message)
             }
@@ -146,7 +149,7 @@ class BookListActivity : Activity() {
         if (clipboardManager.primaryClip.itemCount > 0) {
             val text = clipboardManager.primaryClip.getItemAt(0).text;
             if (text != null) {
-                DataProvider.getInstance().insertArticle(text.toString())
+                DataProvider.instance.insertArticle(text.toString())
                 toast(this, "成功从剪切板添加.")
             }
         }

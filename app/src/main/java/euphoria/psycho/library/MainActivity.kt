@@ -35,8 +35,6 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     var mDicTextView: TextView? = null
 
     private fun initialize() {
-        // Initialize the database
-        DataProvider.getInstance(this)
 
         setContentView(R.layout.main_activity)
 
@@ -181,7 +179,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
 
     fun menuJumpTo() {
         if (mTag == null) return
-        dialog("$mCount", "1-${DataProvider.getInstance().queryCount(mTag)}") {
+        dialog("$mCount", "1-${DataProvider.instance.queryCount(mTag!!)}") {
             val count = it.toIntSafe()
             renderText(mTag, count, 0)
             mCount = count
@@ -214,10 +212,10 @@ class MainActivity : Activity(), ReaderView.SelectListener {
                     if (v.isNullOrBlank()) return@setPositiveButton
                     try {
                         preferences.edit().putString(KEY_PATTERN, v.trim()).commit()
-                        mSearchList = DataProvider.getInstance().queryMatchesContent(mTag, Pattern.compile(v.trim()))
+                        mSearchList = DataProvider.instance.queryMatchesContent(mTag!!, v.trim())
                         if (mSearchList != null) {
                             val y = mScrollView?.scrollY ?: 0
-                            DataProvider.getInstance().updateSettings(mTag, mCount, y)
+                            DataProvider.instance.updateSettings(mTag!!, mCount, y)
                             forward()
                         }
 
@@ -254,7 +252,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     }
 
     private fun renderText(tag: String?, count: Int, scrollY: Int) {
-        val v = DataProvider.getInstance().queryContent(tag, count)
+        val v = DataProvider.instance.queryContent(tag!!, count)
         mReaderView?.text = v
         if (scrollY > -1)
             mScrollView?.post { mScrollView?.scrollTo(0, scrollY) }
@@ -265,13 +263,8 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         val t = tag ?: sharedPreferences.getString(KEY_TAG, null) ?: return
         mTag = t
 
-        val lastedPosition = DataProvider.getInstance().querySettings(t)
-        var count = 1
-        var y = 0
-        if (lastedPosition.size > 1) {
-            count = lastedPosition[0]
-            y = lastedPosition[1]
-        }
+        val (count, y) = DataProvider.instance.querySettings(t)
+
         mCount = count
         renderText(t, count, y)
     }
@@ -300,8 +293,8 @@ class MainActivity : Activity(), ReaderView.SelectListener {
 
     fun queryLastedPosition(tag: String): Pair<Int, Int> {
 
-        var r = DataProvider.getInstance().querySettings(tag)
-        return Pair(r[0], r[1])
+        return DataProvider.instance.querySettings(tag)
+
     }
 
     fun resetSearch() {
@@ -316,7 +309,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         if (mTag != null) {
             preferences.edit().putString(KEY_TAG, mTag).commit()
             val y = mScrollView?.scrollY ?: 0
-            DataProvider.getInstance().updateSettings(mTag, mCount, y)
+            DataProvider.instance.updateSettings(mTag!!, mCount, y)
         }
         super.onPause()
     }
