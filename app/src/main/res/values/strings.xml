@@ -8,7 +8,7 @@
     <string name="menu_file_list">文件</string>
     <string name="menu_font_decrease">减小字体</string>
     <string name="menu_font_increase">增大字体</string>
-    <string name="menu_change_dictionary">切换字典</string>
+    <string name="menu_change_dictionary">字典</string>
     <string name="menu_set_padding">间距</string>
     <string name="menu_set_line">行间距</string>
 

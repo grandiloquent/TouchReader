@@ -90,7 +90,14 @@ class MainActivity : Activity(), ReaderView.SelectListener {
 
     private fun showMenuPanel() {
         mMenuPanel = MenuPanel(this,
-                intArrayOf(R.mipmap.ic_arrow_forward_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_apps_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp, R.mipmap.ic_format_size_black_18dp),
+                intArrayOf(R.mipmap.ic_arrow_forward_black_18dp,
+                        R.mipmap.ic_format_size_black_18dp,
+                        R.mipmap.ic_folder_black_18dp,
+                        R.mipmap.ic_format_color_text_black_18dp,
+                        R.mipmap.ic_format_color_text_black_24dp,
+                        R.mipmap.ic_translate_black_18dp,
+                        R.mipmap.ic_fullscreen_exit_black_18dp,
+                        R.mipmap.ic_menu_black_18dp),
                 arrayOf(resources.getString(R.string.menu_jump_to), resources.getString(R.string.menu_font_size), resources.getString(R.string.menu_file_list), resources.getString(R.string.menu_font_decrease), resources.getString(R.string.menu_font_increase), resources.getString(R.string.menu_change_dictionary), resources.getString(R.string.menu_set_padding), resources.getString(R.string.menu_set_line))) {
             mMenuPanel?.dismiss()
             if (it == 0) {

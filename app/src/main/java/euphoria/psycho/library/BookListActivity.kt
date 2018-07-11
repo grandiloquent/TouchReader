@@ -25,7 +25,17 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_book)
-        initToolbar()
+        toolbar.inflateMenu(R.menu.menu_main)
+        toolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.action_add_from_clipboard -> {
+                    addFromClipboard()
+                    refreshListView()
+                }
+                else -> App.instance.toast("Unknown option")
+            }
+            true
+        }
 
         bookList.layoutManager = LinearLayoutManager(this)
         attachTOScroll(bookList)
@@ -37,6 +47,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         menu?.apply {
             add(0, MENU_ADD_CLIPBOARD, 0, R.string.add_from_clipboard)
             add(0, MENU_ADD_FROM_URL, 0, "从网络添加")
+            add(0, MENU_REPLACE_FROM_CLIPBOARD, 0, "从剪切板替换")
             add(0, MENU_CHANGE_TAG, 0, R.string.change_tag)
             add(0, MENU_DELETE_TAG, 0, R.string.context_menu_delete)
         }
@@ -57,9 +68,21 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menu?.add(0, MENU_ADD_CLIPBOARD, 0, R.string.add_from_clipboard)
-        return super.onCreateOptionsMenu(menu)
+    fun replaceFromClipboard(tag: String) {
+        dialog("", "输入相应位置") {
+            it.toIntOrNull()?.let {
+                val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                if (!clipboardManager.hasPrimaryClip()) return@let
+                if (clipboardManager.primaryClip.itemCount > 0) {
+                    val text = clipboardManager.primaryClip.getItemAt(0).text;
+                    if (text != null) {
+                        DataProvider.instance.updateDocument(tag, it, text.toString())
+                        val message = "成功添加：%s".format(tag);
+                        toast(message)
+                    }
+                }
+            }
+        }
     }
 
     fun changeTag(tag: String) {
@@ -101,6 +124,11 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
                     changeTag(mBookListAdapter!!.getBook(position))
                 return true
             }
+            MENU_REPLACE_FROM_CLIPBOARD -> {
+                if (position != -1)
+                    replaceFromClipboard(mBookListAdapter!!.getBook(position))
+                return true
+            }
             MENU_DELETE_TAG -> {
                 if (position != -1)
                     deleteByTag(mBookListAdapter!!.getBook(position))
@@ -127,6 +155,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         async(UI) {
             var result = bg { url.fetchString() }
             updateDatabase(tag, result.await())
+            toast("成功添加：$url")
         }
     }
 
@@ -150,16 +179,6 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            MENU_ADD_CLIPBOARD -> {
-                addFromClipboard()
-                return true;
-            }
-            else -> return true
-        }
-
-    }
 
     override fun onResume() {
         super.onResume()
@@ -181,6 +200,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
 
     companion object {
         private val MENU_ADD_FROM_URL = 3
+        private val MENU_REPLACE_FROM_CLIPBOARD = 5
         private val MENU_ADD_CLIPBOARD = 0
         private val MENU_CHANGE_TAG = 1
         private val MENU_DELETE_TAG = 2

@@ -14,15 +14,15 @@ interface ToolbarManager {
         }
 
     fun initToolbar() {
-        toolbar.inflateMenu(R.menu.menu_main)
-        toolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.action_settings -> {
-                }
-                else -> App.instance.toast("Unknown option")
-            }
-            true
-        }
+//        toolbar.inflateMenu(R.menu.menu_main)
+//        toolbar.setOnMenuItemClickListener {
+//            when (it.itemId) {
+//                R.id.action_settings -> {
+//                }
+//                else -> App.instance.toast("Unknown option")
+//            }
+//            true
+//        }
     }
 
     fun enableHomeAsUp(up: () -> Unit) {
