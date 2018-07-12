@@ -7,10 +7,36 @@ import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
 import org.jsoup.select.NodeTraversor
 import org.jsoup.select.NodeVisitor
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 private const val USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36"
 private const val ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+
+
+fun File.combineSafariBookDirectory() {
+    if (!this.isDirectory) return
+    val tocFile = File(this, "目录.html")
+    if (!tocFile.isFile) return
+    val hd = Jsoup.parse(tocFile.readText())
+    val links = hd.select("a")
+    val linksList = ArrayList<String>()
+    if (links.isNotEmpty()) {
+        for (l in links) {
+            val fileName = l.attr("href").substringBefore('#')
+            if (!linksList.contains(fileName))
+                linksList.add(fileName)
+        }
+    }
+    val sb = StringBuilder()
+    sb.append("<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"utf-8\"> <meta content=\"IE=edge\" http-equiv=\"X-UA-Compatible\"> <meta content=\"width=device-width,initial-scale=1\" name=\"viewport\"><link href=\"style.css\" rel=\"stylesheet\"></head>")
+    for (f in linksList) {
+        val filePath = File(this, f)
+        if (filePath.isFile)
+            sb.append(Jsoup.parse(filePath.readText()).body().html())
+    }
+    sb.append("</body></html>")
+}
 
 fun String.htm2txt(): String {
 

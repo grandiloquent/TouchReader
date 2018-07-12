@@ -112,6 +112,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
             } else if (it == 4) {
                 menuFontSizeIncrease()
             } else if (it == 5) {
+                startDictionaryService()
             } else if (it == 6) {
                 menuSetPadding()
             } else if (it == 7) {
@@ -119,6 +120,11 @@ class MainActivity : Activity(), ReaderView.SelectListener {
             }
         }
         mMenuPanel?.showAtLocation(layout, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 0)
+    }
+
+    fun startDictionaryService() {
+        val intent = Intent(this, ClipboardService::class.java)
+        startService(intent)
     }
 
     private fun back() {

@@ -1,4 +1,5 @@
 package euphoria.psycho.library
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -16,6 +17,7 @@ import android.widget.TextView
 import java.io.File
 import java.lang.reflect.Field
 import java.util.*
+
 class FileActivity : AppCompatActivity(), FileClickListener {
     var mToolbar: Toolbar? = null
     var mStartPath: String? = Environment.getExternalStorageDirectory().absolutePath
@@ -34,6 +36,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             }
         }, 150L)
     }
+
     fun updateTitle() {
         supportActionBar?.let {
             var titlePath: String? = null
@@ -49,6 +52,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             }
         }
     }
+
     fun checkPermission(permission: String, requestPermissionCode: Int, onFailure: () -> Unit, onSuccess: () -> Unit) {
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
@@ -58,6 +62,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             }
         } else onSuccess()
     }
+
     private fun initialize() {
         setContentView(R.layout.file_activity)
         mToolbar = findViewById(R.id.toolbar)
@@ -82,6 +87,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
                 )).addToBackStack(null)
                 .commit()
     }
+
     fun initBackStackState() {
         var pathToAdd = mCurrentPath
         val separatedPaths = ArrayList<String>()
@@ -94,6 +100,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             addFragmentToBackStack(path);
         }
     }
+
     fun addFragmentToBackStack(path: String) {
         supportFragmentManager.beginTransaction()
                 .replace(R.id.container, DirectoryFragment.getInstance(
@@ -101,23 +108,31 @@ class FileActivity : AppCompatActivity(), FileClickListener {
                 )).addToBackStack(null)
                 .commit()
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
         menu?.findItem(R.id.action_close)?.setVisible(true)
         return super.onCreateOptionsMenu(menu)
     }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             android.R.id.home -> onBackPressed()
             R.id.action_close -> finish()
+            R.id.action_combine_safari -> {
+                File(mCurrentPath).combineSafariBookDirectory()
+                
+            }
         }
         return true
     }
+
     override fun onPause() {
         super.onPause()
         preferences.edit().putString(STATE_START_PATH, mStartPath)
                 .putString(STATE_CURRENT_PATH, mCurrentPath).commit()
     }
+
     override fun onBackPressed() {
         if (mCurrentPath != mStartPath) {
             supportFragmentManager.popBackStack()
@@ -127,7 +142,8 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             finish()
         }
     }
-//    override fun onSaveInstanceState(outState: Bundle?) {
+
+    //    override fun onSaveInstanceState(outState: Bundle?) {
 //        super.onSaveInstanceState(outState)
 //        Log.e(TAG, "[onSaveInstanceState]");
 //        outState?.putString(STATE_CURRENT_PATH, mCurrentPath)
@@ -150,9 +166,11 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             ), REQUEST_PERMISSIONS_CODE);
         } else initialize()
     }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         initialize()
     }
+
     companion object {
         private const val REQUEST_PERMISSIONS_CODE = 1;
         private const val STATE_CURRENT_PATH = "state_current_path"
