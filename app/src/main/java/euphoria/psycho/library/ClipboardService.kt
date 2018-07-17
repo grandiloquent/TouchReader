@@ -1,17 +1,14 @@
 package euphoria.psycho.library
 
-import android.app.IntentService
 import android.app.Notification
+import android.app.Service
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 
 
-class ClipboardService : IntentService("euphoria.psycho.library.ClipboardService") {
-    override fun onHandleIntent(p0: Intent?) {
-
-    }
+class ClipboardService : Service() {
 
     private var mClipboardManager: ClipboardManager? = null
     private var mWord: String? = null

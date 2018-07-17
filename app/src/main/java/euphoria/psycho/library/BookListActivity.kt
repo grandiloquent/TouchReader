@@ -24,6 +24,16 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     var mBookListAdapter: BookListAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val unCaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler(object : Thread.UncaughtExceptionHandler {
+            override fun uncaughtException(p0: Thread?, p1: Throwable?) {
+                p1?.logToFile()
+                if (unCaughtExceptionHandler != null) {
+                    unCaughtExceptionHandler.uncaughtException(p0, p1)
+                } else System.exit(2)
+            }
+
+        })
         setContentView(R.layout.activity_book)
         toolbar.inflateMenu(R.menu.menu_main)
         toolbar.setOnMenuItemClickListener {
@@ -61,7 +71,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         if (clipboardManager.primaryClip.itemCount > 0) {
             val text = clipboardManager.primaryClip.getItemAt(0).text;
             if (text != null) {
-                DataProvider.instance.addFromClipboard(tag, text.toString())
+                DataProvider.getInstance().addFromClipboard(tag, text.toString())
                 val message = "成功添加：%s".format(tag);
                 toast(message)
             }
@@ -76,7 +86,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
                 if (clipboardManager.primaryClip.itemCount > 0) {
                     val text = clipboardManager.primaryClip.getItemAt(0).text;
                     if (text != null) {
-                        DataProvider.instance.updateDocument(tag, it, text.toString())
+                        DataProvider.getInstance().updateDocument(tag, it, text.toString())
                         val message = "成功添加：%s".format(tag);
                         toast(message)
                     }
@@ -88,7 +98,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     fun changeTag(tag: String) {
         dialog(tag, "修改书本名") {
             if (it.isNotBlank())
-                DataProvider.instance.updateTag(tag, it.trim())
+                DataProvider.getInstance().updateTag(tag, it.trim())
             refreshListView();
 
         }
@@ -96,12 +106,12 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     }
 
     fun deleteByTag(tag: String) {
-        DataProvider.instance.deleteByTag(tag);
+        DataProvider.getInstance().deleteByTag(tag);
         refreshListView();
     }
 
     private fun refreshListView() {
-        mBookListAdapter?.switchData(DataProvider.instance.listTag())
+        mBookListAdapter?.switchData(DataProvider.getInstance().listTag())
     }
 
     override fun onContextItemSelected(item: MenuItem?): Boolean {
@@ -162,7 +172,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     fun updateDatabase(tag: String, content: String?) {
 
         content?.let {
-            DataProvider.instance.addFromClipboard(tag, content)
+            DataProvider.getInstance().addFromClipboard(tag, content)
         }
 
     }
@@ -173,7 +183,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         if (clipboardManager.primaryClip.itemCount > 0) {
             val text = clipboardManager.primaryClip.getItemAt(0).text;
             if (text != null) {
-                DataProvider.instance.insertArticle(text.toString())
+                DataProvider.getInstance().insertArticle(text.toString())
                 toast("成功从剪切板添加.")
             }
         }
@@ -186,7 +196,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
     }
 
     fun loadBook() {
-        mBookListAdapter = BookListAdapter(DataProvider.instance.listTag()) {
+        mBookListAdapter = BookListAdapter(DataProvider.getInstance().listTag()) {
 
             val intent = Intent().apply {
                 putExtra(MainActivity.KEY_TAG, it)

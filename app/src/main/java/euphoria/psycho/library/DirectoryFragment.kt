@@ -9,13 +9,13 @@ import java.io.File
 import java.io.FileFilter
 
 class DirectoryFragment : Fragment() {
-    var mEmptyView: View? = null
-    var mPath: String? = null
-    var mCompositeFilter: CompositeFilter? = null
-    var mEmptyRecyclerView: EmptyRecyclerView? = null
-    var mDirectoryAdapter: DirectoryAdapter? = null
-    var mFileClickListener: FileClickListener? = null
-    fun initializeArgs() {
+    private var mEmptyView: View? = null
+    private var mPath: String? = null
+    private var mCompositeFilter: CompositeFilter? = null
+    private var mEmptyRecyclerView: EmptyRecyclerView? = null
+    private var mDirectoryAdapter: DirectoryAdapter? = null
+    private var mFileClickListener: FileClickListener? = null
+    private fun initializeArgs() {
         mCompositeFilter = CompositeFilter(arrayListOf(object : FileFilter {
             override fun accept(f: File?): Boolean {
                 return true
@@ -29,7 +29,7 @@ class DirectoryFragment : Fragment() {
         }
     }
 
-    fun initializeFilesList() {
+    private fun initializeFilesList() {
         mDirectoryAdapter = DirectoryAdapter(context!!, File(mPath).getFileListByDirPath(mCompositeFilter!!)) { _, p ->
             mFileClickListener?.let {
                 it.onClick(mDirectoryAdapter?.getModel(p))
@@ -42,7 +42,7 @@ class DirectoryFragment : Fragment() {
         }
     }
 
-    fun refresh() {
+    private fun refresh() {
         mDirectoryAdapter?.switchData(File(mPath).getFileListByDirPath(mCompositeFilter!!))
     }
 
@@ -80,7 +80,7 @@ class DirectoryFragment : Fragment() {
             }
             R.id.action_import_file -> {
                 mDirectoryAdapter?.getModel(i.position)?.let {
-                    DataProvider.instance.importFile(it)
+                    DataProvider.getInstance().importFile(it)
                 }
                 true
             }
@@ -94,7 +94,7 @@ class DirectoryFragment : Fragment() {
         return super.onContextItemSelected(item)
     }
 
-    fun convertToTextFile(f: File) {
+    private fun convertToTextFile(f: File) {
         if (!f.isFile) return
         var htmRegex = Regex("\\.(?:html|htm|xhtml)$")
 

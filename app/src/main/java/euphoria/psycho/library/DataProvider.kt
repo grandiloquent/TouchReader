@@ -160,8 +160,11 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
 
     companion object {
         private const val DATABASE_VERSION = 1
-        val instance by lazy {
-            DataProvider()
-        }
+
+        private var instance: DataProvider? = null
+
+        fun getInstance() = instance ?: DataProvider().also { instance = it }
+
+
     }
 }

@@ -45,7 +45,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         search.setOnLongClickListener {
             resetSearch()
             mTag?.let {
-                val (count, y) = DataProvider.instance.querySettings(it)
+                val (count, y) = DataProvider.getInstance().querySettings(it)
                 mCount = count
                 renderText(it, count, y)
             }
@@ -94,7 +94,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
                         R.mipmap.ic_format_size_black_18dp,
                         R.mipmap.ic_folder_black_18dp,
                         R.mipmap.ic_format_color_text_black_18dp,
-                        R.mipmap.ic_format_color_text_black_24dp,
+                        R.mipmap.ic_format_color_text_black_18dp,
                         R.mipmap.ic_translate_black_18dp,
                         R.mipmap.ic_fullscreen_exit_black_18dp,
                         R.mipmap.ic_menu_black_18dp),
@@ -159,7 +159,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
 
     fun menuJumpTo() {
         mTag?.let {
-            dialog("$mCount", "1-${DataProvider.instance.queryCount(it)}") {
+            dialog("$mCount", "1-${DataProvider.getInstance().queryCount(it)}") {
                 it.toIntOrNull()?.let {
                     renderText(mTag, it, 0)
                     mCount = it
@@ -186,10 +186,10 @@ class MainActivity : Activity(), ReaderView.SelectListener {
                 if (it.isNotBlank()) {
                     try {
                         preferences.edit().putString(KEY_PATTERN, it.trim()).commit()
-                        mSearchList = DataProvider.instance.queryMatchesContent(mTag!!, it.trim())
+                        mSearchList = DataProvider.getInstance().queryMatchesContent(mTag!!, it.trim())
                         if (mSearchList != null) {
                             val y = scrollView.scrollY
-                            DataProvider.instance.updateSettings(mTag!!, mCount, y)
+                            DataProvider.getInstance().updateSettings(mTag!!, mCount, y)
                             forward()
                         }
                     } catch (e: Exception) {
@@ -222,7 +222,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     }
 
     private fun renderText(tag: String?, count: Int, scrollY: Int) {
-        val v = DataProvider.instance.queryContent(tag!!, count)
+        val v = DataProvider.getInstance().queryContent(tag!!, count)
         readerView.text = v
         if (scrollY > -1)
             scrollView.post { scrollView.scrollTo(0, scrollY) }
@@ -231,7 +231,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     fun loadLasted(tag: String?, sharedPreferences: SharedPreferences) {
         val t = tag ?: sharedPreferences.getString(KEY_TAG, null) ?: return
         mTag = t
-        val (count, y) = DataProvider.instance.querySettings(t)
+        val (count, y) = DataProvider.getInstance().querySettings(t)
         mCount = count
         renderText(t, count, y)
     }
@@ -262,7 +262,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         mTag?.let {
             preferences.edit().putString(KEY_TAG, it).commit()
             val y = scrollView.scrollY
-            DataProvider.instance.updateSettings(it, mCount, y)
+            DataProvider.getInstance().updateSettings(it, mCount, y)
         }
         super.onPause()
     }
@@ -285,7 +285,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         if (requestCode == REQUEST_BOOK_CODE && resultCode == RESULT_OK && data != null) {
             resetSearch()
             val tag = data.getStringExtra(KEY_TAG)
-            val (count, y) = DataProvider.instance.querySettings(tag)
+            val (count, y) = DataProvider.getInstance().querySettings(tag)
             mTag = tag
             mCount = count
             renderText(tag, count, y)
@@ -294,6 +294,18 @@ class MainActivity : Activity(), ReaderView.SelectListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val unCaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+        Thread.setDefaultUncaughtExceptionHandler(object : Thread.UncaughtExceptionHandler {
+            override fun uncaughtException(p0: Thread?, p1: Throwable?) {
+                p1?.logToFile()
+                if (unCaughtExceptionHandler != null) {
+                    unCaughtExceptionHandler.uncaughtException(p0, p1)
+                } else System.exit(2)
+            }
+
+        })
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,

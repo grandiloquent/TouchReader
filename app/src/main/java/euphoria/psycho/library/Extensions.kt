@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Environment
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
@@ -69,6 +70,7 @@ fun TextView.bringPointIntoView(scrollView: ScrollView, offset: Int) {
     val y = ((line + 0.5) * this.lineHeight).toInt()
     scrollView.post { scrollView.scrollTo(0, y - scrollView.height / 2) }
 }
+
 /*
 View
  */
@@ -79,6 +81,7 @@ fun View.slideExit() {
 fun View.slideEnter() {
     if (translationY < 0f) animate().translationY(0f)
 }
+
 /*String*/
 //fun String.toIntSafe(): Int {
 //    val r = Regex("[0-9]+")
@@ -113,6 +116,17 @@ fun File.getFileListByDirPath(filter: FileFilter): ArrayList<File> {
     for (f in files) arrayList.add(f)
     arrayList.sortWith(compareBy<File> { it.isFile }.thenBy { it.name })
     return arrayList
+}
+
+/*
+Log
+*/
+fun Throwable.logToFile() {
+    val fileName = File(Environment.getExternalStorageDirectory(), "errors.log");
+    this.message?.let {
+        fileName.appendText(it)
+    }
+    fileName.appendText(this.stackTrace.joinToString("\n"))
 }
 
 /*

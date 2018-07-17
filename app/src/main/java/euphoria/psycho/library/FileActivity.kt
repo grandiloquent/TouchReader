@@ -121,7 +121,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
             R.id.action_close -> finish()
             R.id.action_combine_safari -> {
                 File(mCurrentPath).combineSafariBookDirectory()
-                
+
             }
         }
         return true
