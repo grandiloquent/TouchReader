@@ -72,26 +72,30 @@ class DirectoryFragment : Fragment() {
 
     override fun onContextItemSelected(item: MenuItem?): Boolean {
         val i = item?.menuInfo as EmptyRecyclerView.RecyclerViewContextMenuInfo
-        when (item?.itemId) {
+        when (item.itemId) {
             R.id.action_delete -> {
                 mDirectoryAdapter?.getModel(i.position)?.deletes()
                 refresh()
-                true
             }
             R.id.action_import_file -> {
                 mDirectoryAdapter?.getModel(i.position)?.let {
                     DataProvider.getInstance().importFile(it)
                 }
-                true
             }
             R.id.action_convert_to_txt -> {
                 mDirectoryAdapter?.getModel(i.position)?.let {
                     convertToTextFile(it)
                 }
-                true
+            }
+            R.id.action_typeface -> {
+                mDirectoryAdapter?.getModel(i.position)?.let {
+                    if (it.name.endsWith(".ttf")) {
+                        context?.run { preferences.edit().putString(MainActivity.KEY_TYPEFACE, it.absolutePath).apply() }
+                    }
+                }
             }
         }
-        return super.onContextItemSelected(item)
+        return true
     }
 
     private fun convertToTextFile(f: File) {

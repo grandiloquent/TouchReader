@@ -38,15 +38,22 @@ fun File.combineSafariBookDirectory() {
     sb.append("</body></html>")
 }
 
-fun String.htm2txt(): String {
+fun String.htm2txt(special: Boolean = false): String {
 
     val d = Jsoup.parse(this)
     val f = FormattingVisitor()
-    NodeTraversor(f).traverse(d?.body())
-    return f.toString()
+    if (special) {
+        NodeTraversor(f).traverse(d?.body()?.select(".b-story-body-x")?.first())
+        return (d?.body()?.select(".b-story-header h1")?.first()?.text()
+                ?: "") + "\n" + f.toString()
+    } else {
+        NodeTraversor(f).traverse(d?.body())
+        return f.toString()
+    }
+
 }
 
-fun String.fetchString(): String? {
+fun String.fetchString(special: Boolean = false): String? {
 
     val oh = OkHttpClient
             .Builder()
@@ -60,7 +67,7 @@ fun String.fetchString(): String? {
             .build()
     val res = oh.newCall(req).execute()
     if (res.isSuccessful) {
-        return res.body()?.string()?.htm2txt()
+        return res.body()?.string()?.htm2txt(special)
     }
     return null
 

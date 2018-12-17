@@ -67,7 +67,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
         setContentView(R.layout.file_activity)
         mToolbar = findViewById(R.id.toolbar)
         setSupportActionBar(mToolbar)
-        supportActionBar?.let { it.setDisplayHomeAsUpEnabled(true) }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         try {
             var field: Field? = null
             if (mTitle.isNullOrEmpty())
@@ -130,7 +130,7 @@ class FileActivity : AppCompatActivity(), FileClickListener {
     override fun onPause() {
         super.onPause()
         preferences.edit().putString(STATE_START_PATH, mStartPath)
-                .putString(STATE_CURRENT_PATH, mCurrentPath).commit()
+                .putString(STATE_CURRENT_PATH, mCurrentPath).apply()
     }
 
     override fun onBackPressed() {

@@ -163,7 +163,13 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
 
     fun addFromURLImplement(url: String, tag: String) {
         async(UI) {
-            var result = bg { url.fetchString() }
+            var result = bg {
+                if (url.contains("literotica"))
+                    url.fetchString(true)
+                else
+                    url.fetchString()
+
+            }
             updateDatabase(tag, result.await())
             toast("成功添加：$url")
         }

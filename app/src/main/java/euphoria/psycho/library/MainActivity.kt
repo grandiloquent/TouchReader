@@ -74,16 +74,16 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         dialog("${preferences.getInt(KEY_PADDING, 0)}", "设置边间距") {
             it.toIntOrNull()?.let {
                 readerView.setPadding(it, it, it, it)
-                preferences.edit().putInt(KEY_PADDING, it).commit()
+                preferences.edit().putInt(KEY_PADDING, it).apply()
             }
         }
     }
 
     private fun menuSetLineSpace() {
-        dialog("${preferences.getInt(KEY_LINESPACINGMULTIPLIER, 0)}", "设置行间距") {
+        dialog("${preferences.getFloat(KEY_LINESPACINGMULTIPLIER, 0f)}", "设置行间距") {
             it.toFloatOrNull()?.let {
                 readerView.setLineSpacing(0f, it)
-                preferences.edit().putFloat(KEY_LINESPACINGMULTIPLIER, it).commit()
+                preferences.edit().putFloat(KEY_LINESPACINGMULTIPLIER, it).apply()
             }
         }
     }
@@ -240,7 +240,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
         // Setting typeface
         val typeface = sharedPreferences.getString(KEY_TYPEFACE, null)
         typeface?.let {
-            var f = File(typeface)
+            val f = File(typeface)
             if (f.isFile) readerView.typeface = Typeface.createFromFile(f)
         }
 
@@ -260,7 +260,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
 
     override fun onPause() {
         mTag?.let {
-            preferences.edit().putString(KEY_TAG, it).commit()
+            preferences.edit().putString(KEY_TAG, it).apply()
             val y = scrollView.scrollY
             DataProvider.getInstance().updateSettings(it, mCount, y)
         }
