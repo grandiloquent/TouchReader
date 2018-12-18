@@ -115,7 +115,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
             } else if (it == 6) {
                 menuSetPadding()
             } else if (it == 7) {
-                readerView.isSelected = !readerView.isSelected;
+                readerView.switchSelectable();
                 menuSetLineSpace()
 
             }
