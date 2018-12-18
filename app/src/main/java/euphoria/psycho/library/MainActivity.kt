@@ -115,9 +115,9 @@ class MainActivity : Activity(), ReaderView.SelectListener {
             } else if (it == 6) {
                 menuSetPadding()
             } else if (it == 7) {
+                readerView.isSelected = !readerView.isSelected;
                 menuSetLineSpace()
 
-                readerView.setTextIsSelectable(!readerView.isTextSelectable)
             }
         }
         mMenuPanel?.showAtLocation(layout, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 0)
