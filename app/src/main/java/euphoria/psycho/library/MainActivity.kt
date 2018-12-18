@@ -27,7 +27,6 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     var mSearchCount = -1
 
     var preferenceFontSize: Float by DelegatesExt.preference(this, KEY_FONT_SIZE, DEFAULT_FONT_SIZE)
-    var preferenceTypeFace: String by DelegatesExt.preference(this, KEY_TYPEFACE, "")
 
     private fun initialize() {
         setContentView(R.layout.main_activity)
@@ -117,6 +116,8 @@ class MainActivity : Activity(), ReaderView.SelectListener {
                 menuSetPadding()
             } else if (it == 7) {
                 menuSetLineSpace()
+
+                readerView.setTextIsSelectable(!readerView.isTextSelectable)
             }
         }
         mMenuPanel?.showAtLocation(layout, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 0)
@@ -181,7 +182,7 @@ class MainActivity : Activity(), ReaderView.SelectListener {
     private fun searchInBooks() {
         mTag?.let {
             resetSearch()
-            dialog(preferences.getString(KEY_PATTERN, null),
+            dialog(preferences.getString(KEY_PATTERN, ""),
                     "使用正则表达式搜索") {
                 if (it.isNotBlank()) {
                     try {
