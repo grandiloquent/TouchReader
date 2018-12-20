@@ -178,7 +178,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
                     val out = FileOutputStream(File(dir, "$book.txt"))
 
                     for (i in 0..count) {
-                        
+
                         out.write(dataProvider.queryContent(book, i).toByteArray())
                     }
                     out.close()

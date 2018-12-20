@@ -143,10 +143,12 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
     }
 
     fun deleteByTag(tag: String) {
+        writableDatabase.execSQL("VACUUM")
         writableDatabase.delete("document", "tag=?", arrayOf(tag))
     }
 
     override fun onCreate(sqLiteDatabase: SQLiteDatabase?) {
+
         sqLiteDatabase?.run {
             execSQL("CREATE TABLE IF NOT EXISTS document (tag TEXT ,content TEXT,count INTEGER)");
             execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `idx_tag_count` ON `document` (`tag` ,`count` ASC)");
