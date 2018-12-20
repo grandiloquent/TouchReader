@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -21,8 +22,11 @@ import kotlinx.coroutines.experimental.async
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jetbrains.anko.coroutines.experimental.bg
+import org.jetbrains.anko.db.NULL
 import org.jetbrains.anko.find
 import org.jsoup.Jsoup
+import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 class BookListActivity : AppCompatActivity(), ToolbarManager {
@@ -74,6 +78,7 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
             add(0, MENU_REPLACE_FROM_CLIPBOARD, 0, "从剪切板替换")
             add(0, MENU_CHANGE_TAG, 0, R.string.change_tag)
             add(0, MENU_DELETE_TAG, 0, R.string.context_menu_delete)
+            add(0, MENU_EXPORT_FILE, 0, "导出")
         }
 
         super.onCreateContextMenu(menu, v, menuInfo)
@@ -160,6 +165,24 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
             }
             MENU_ADD_FROM_URL -> {
                 addFromURL(mBookListAdapter!!.getBook(position))
+                return true
+            }
+            MENU_EXPORT_FILE -> {
+                mBookListAdapter?.let {
+                    val book = it.getBook(position);
+                    val dataProvider = DataProvider.getInstance();
+                    val count = dataProvider.queryCount(book);
+                    val parent = File(Environment.getExternalStorageDirectory(), ".readings");
+                    val dir = File(parent, "exports");
+                    dir.mkdirs()
+                    val out = FileOutputStream(File(dir, "$book.txt"))
+
+                    for (i in 0..count) {
+                        
+                        out.write(dataProvider.queryContent(book, i).toByteArray())
+                    }
+                    out.close()
+                }
                 return true
             }
             else -> return true
@@ -267,6 +290,8 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
         private val MENU_ADD_CLIPBOARD = 0
         private val MENU_CHANGE_TAG = 1
         private val MENU_DELETE_TAG = 2
+
+        private val MENU_EXPORT_FILE = 6
         private val TAG = "BookListActivity"
     }
 }
