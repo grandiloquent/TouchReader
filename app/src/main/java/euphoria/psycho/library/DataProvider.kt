@@ -20,13 +20,13 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
         var count = 0;
         for (line in list) {
             if (line.isNotBlank())
-                sb.append(line)
+                sb.append(line).append('\n')
             if (sb.length > length) {
                 insert(tag, sb.toString(), ++count)
                 sb = StringBuilder()
             }
         }
-        if (sb.length > 0) {
+        if (sb.isNotEmpty()) {
             insert(tag, sb.toString(), ++count)
         }
     }

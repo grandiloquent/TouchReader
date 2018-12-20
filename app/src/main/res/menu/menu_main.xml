@@ -8,4 +8,9 @@
         android:orderInCategory="100"
         android:title="从剪切板添加"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_add_from_network"
+        android:orderInCategory="100"
+        android:title="从网络添加"
+        app:showAsAction="never"/>
 </menu>

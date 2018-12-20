@@ -5,22 +5,29 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_book.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.find
+import org.jsoup.Jsoup
+import java.util.concurrent.TimeUnit
 
 class BookListActivity : AppCompatActivity(), ToolbarManager {
     override val toolbar by lazy { find<Toolbar>(R.id.toolbar) }
-
+    private val mHandler = Handler();
     var mBookListAdapter: BookListAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +48,13 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
                 R.id.action_add_from_clipboard -> {
                     addFromClipboard()
                     refreshListView()
+                }
+                R.id.action_add_from_network -> {
+                    dialog("", "输入相应的网址") {
+                        addFromURLImplement(it, "Network")
+                        refreshListView()
+
+                    }
                 }
                 else -> App.instance.toast("Unknown option")
             }
@@ -161,18 +175,51 @@ class BookListActivity : AppCompatActivity(), ToolbarManager {
 
     }
 
+
     fun addFromURLImplement(url: String, tag: String) {
-        async(UI) {
-            var result = bg {
-                if (url.contains("literotica"))
-                    url.fetchString(true)
-                else
+        if (url.contains("literotica")) {
+            addFromLitErotica(url, tag)
+        } else {
+            async(UI) {
+                var result = bg {
+
                     url.fetchString()
 
+                }
+                updateDatabase(tag, result.await())
+                toast("成功添加：$url")
             }
-            updateDatabase(tag, result.await())
-            toast("成功添加：$url")
         }
+
+    }
+
+
+    fun addFromLitErotica(url: String, tag: String) {
+        Thread(Runnable {
+            url.fetchHtml()?.let {
+
+                val str = it.htm2txt(true);
+                updateDatabase(tag, str);
+
+                val js = Jsoup.parse(it)
+                val elements = js.select(".b-pager-pages option")
+
+                if (elements.size >= 0) {
+                    val count = elements.size;
+                    for (index in 2..count) {
+                        val sublink = "$url?page=$index"
+                        val value = "$index\r\n${sublink.fetchHtml()?.htm2txt(true)}"
+                        updateDatabase(tag, value);
+                    }
+                }
+                mHandler.post {
+                    Toast.makeText(this@BookListActivity, url, Toast.LENGTH_LONG).show();
+                }
+
+            }
+
+
+        }).start();
     }
 
     fun updateDatabase(tag: String, content: String?) {
