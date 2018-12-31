@@ -94,10 +94,10 @@ class DirectoryFragment : Fragment() {
                     }
                 }
             }
-            R.id.action_typeface -> {
+            R.id.action_zip -> {
                 mDirectoryAdapter?.getModel(i.position)?.let {
                     if (it.name.endsWith(".epub") || it.name.endsWith(".zip")) {
-                        FileUtils.unpackZip(it.absolutePath.substringBeforeLast('.'), it.absolutePath);
+                        FileUtils.unpackZip(it.absolutePath);
                     }
                 }
             }

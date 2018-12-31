@@ -19,17 +19,25 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import kotlin.text.StringsKt;
+
 public class FileUtils {
     public static String getFileNameWithoutExtension(String path) {
         return path.replaceFirst("[.][^.]+$", "");
     }
 
-    public static boolean unpackZip(String path, String zipname) {
+    public static boolean unpackZip(String fullName) {
         InputStream is;
         ZipInputStream zis;
+
+        String path = StringsKt.substringBeforeLast(fullName, ".", "") + "/";
+        File file = new File(path);
+        if (!file.isDirectory()) {
+            file.mkdir();
+        }
         try {
             String filename;
-            is = new FileInputStream(path + zipname);
+            is = new FileInputStream(fullName);
             zis = new ZipInputStream(new BufferedInputStream(is));
             ZipEntry ze;
             byte[] buffer = new byte[1024];
