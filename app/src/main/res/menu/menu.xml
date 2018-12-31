@@ -9,4 +9,7 @@
     <item
         android:id="@+id/action_combine_safari"
         android:title="合并Safari文件夹"></item>
+    <item
+        android:id="@+id/action_toc"
+        android:title="创建目录文件" />
 </menu>

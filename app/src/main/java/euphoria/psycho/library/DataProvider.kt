@@ -20,7 +20,7 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
         var count = 0;
         for (line in list) {
             if (line.isNotBlank())
-                sb.append(line).append('\n')
+                sb.append(line).append("\n\n")
             if (sb.length > length) {
                 insert(tag, sb.toString(), ++count)
                 sb = StringBuilder()
@@ -143,7 +143,7 @@ class DataProvider(context: Context = App.instance) : SQLiteOpenHelper(
     }
 
     fun deleteByTag(tag: String) {
-        writableDatabase.execSQL("VACUUM")
+        //writableDatabase.execSQL("VACUUM")
         writableDatabase.delete("document", "tag=?", arrayOf(tag))
     }
 

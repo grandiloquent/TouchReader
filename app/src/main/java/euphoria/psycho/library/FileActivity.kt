@@ -123,6 +123,9 @@ class FileActivity : AppCompatActivity(), FileClickListener {
                 File(mCurrentPath).combineSafariBookDirectory()
 
             }
+            R.id.action_toc->{
+                EbookUtils.generateHTML(mCurrentPath);
+            }
         }
         return true
     }
