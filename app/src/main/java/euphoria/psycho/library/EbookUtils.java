@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -116,11 +117,17 @@ public class EbookUtils {
         if (elements.size() == 0) return;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<ol>");
-        for (Element element : elements) {
+        List<String> links = new ArrayList<>();
+        List<String> titles = new ArrayList<>();
 
+        for (Element element : elements) {
+            String href = element.select("content").get(0).attr("src");
+            links.add(href);
+            String title = element.select("text").get(0).text();
+            titles.add(title);
             stringBuilder.append(String.format("<li><a href=\"%s\">%s</a></li>",
-                    element.select("content").get(0).attr("src"),
-                    element.select("text").get(0).text()));
+                    href,
+                    title));
         }
         stringBuilder.append("</ol>");
 
@@ -133,7 +140,36 @@ public class EbookUtils {
         } catch (Exception e) {
 
         }
+        stringBuilder = new StringBuilder();
+        stringBuilder.append("<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"utf-8\"> <meta content=\"IE=edge\" http-equiv=\"X-UA-Compatible\"> <meta content=\"width=device-width,initial-scale=1\" name=\"viewport\"><link href=\"style.css\" rel=\"stylesheet\"></head><body>");
+        int j = 0;
+        stringBuilder.append("<ol>");
+        for (String link : titles) {
+            stringBuilder.append(String.format("<li><a href=\"#section-%d\">%s</a></li>", ++j, link));
+        }
+        stringBuilder.append("</ol>");
+        int i = 0;
+        for (String link : links) {
+            try {
+                Document doc = Jsoup.parse(new File(dir, link), "utf-8");
+                stringBuilder.append(String.format("<div id=\"section-%d\">", ++i));
+                stringBuilder.append(doc.body().html());
+                stringBuilder.append("<div>");
 
+            } catch (Exception e) {
+
+            }
+        }
+        stringBuilder.append("</body></html>");
+        File targetFile = new File(dir, "书籍.html");
+        try {
+            FileOutputStream outputStream = new FileOutputStream(targetFile);
+            byte[] buffer = stringBuilder.toString().getBytes(Charset.forName("utf-8"));
+            outputStream.write(buffer, 0, buffer.length);
+            outputStream.close();
+        } catch (Exception e) {
+
+        }
     }
 
     private static String getPlainText(Element element) {

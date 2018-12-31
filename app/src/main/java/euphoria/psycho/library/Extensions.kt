@@ -109,8 +109,9 @@ fun File.deletes() {
 }
 
 fun File.getFileListByDirPath(filter: FileFilter): ArrayList<File> {
+
     val arrayList = ArrayList<File>()
-    if (isFile) return arrayList
+    if (isFile || !exists()) return arrayList
     val files = listFiles(filter)
     if (files == null) arrayList
     for (f in files) arrayList.add(f)
