@@ -13,4 +13,7 @@
     <item
         android:id="@+id/action_delete"
         android:title="删除"></item>
+    <item
+        android:id="@+id/action_zip"
+        android:title="解压ZIP文件" />
 </menu>

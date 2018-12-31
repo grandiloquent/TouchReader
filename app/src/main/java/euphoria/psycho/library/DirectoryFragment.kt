@@ -94,6 +94,13 @@ class DirectoryFragment : Fragment() {
                     }
                 }
             }
+            R.id.action_typeface -> {
+                mDirectoryAdapter?.getModel(i.position)?.let {
+                    if (it.name.endsWith(".epub") || it.name.endsWith(".zip")) {
+                        FileUtils.unpackZip(it.absolutePath.substringBeforeLast('.'), it.absolutePath);
+                    }
+                }
+            }
         }
         return true
     }
