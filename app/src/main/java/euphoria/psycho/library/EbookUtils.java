@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -118,11 +119,18 @@ public class EbookUtils {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<ol>");
         List<String> links = new ArrayList<>();
+        List<String> srcList = new ArrayList<>();
         List<String> titles = new ArrayList<>();
 
         for (Element element : elements) {
             String href = element.select("content").get(0).attr("src");
             links.add(href);
+            String src = href;
+            if (src.lastIndexOf('#') != -1) {
+                src = src.substring(0, src.lastIndexOf('#'));
+            }
+            if (!srcList.contains(src))
+                srcList.add(src);
             String title = element.select("text").get(0).text();
             titles.add(title);
             stringBuilder.append(String.format("<li><a href=\"%s\">%s</a></li>",
@@ -149,7 +157,7 @@ public class EbookUtils {
         }
         stringBuilder.append("</ol>");
         int i = 0;
-        for (String link : links) {
+        for (String link : srcList) {
             try {
                 Document doc = Jsoup.parse(new File(dir, link), "utf-8");
                 stringBuilder.append(String.format("<div id=\"section-%d\">", ++i));
